@@ -1,0 +1,138 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}{{ profile_user.get_full_name }}'s Profile{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-4">
+            <!-- User Information Card -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">User Information</h6>
+                </div>
+                <div class="card-body">
+                    {% if profile_user.profile_picture %}
+                        <img src="{{ profile_user.profile_picture.url }}" class="rounded-circle mb-3" style="width: 150px; height: 150px; object-fit: cover;">
+                    {% else %}
+                        <div class="rounded-circle bg-light mb-3 d-flex align-items-center justify-content-center" style="width: 150px; height: 150px;">
+                            <i class="fas fa-user fa-3x text-muted"></i>
+                        </div>
+                    {% endif %}
+                    <h5 class="card-title">{{ profile_user.get_full_name }}</h5>
+                    <p class="card-text">
+                        <strong>Username:</strong> {{ profile_user.username }}<br>
+                        <strong>Email:</strong> {{ profile_user.email }}<br>
+                        <strong>Role:</strong> {{ profile_user.get_role_display }}<br>
+                        <strong>Fine Balance:</strong> ${{ profile_user.fine_balance|floatformat:2 }}<br>
+                        <strong>Phone:</strong> {{ profile_user.phone_number|default:"Not provided" }}<br>
+                        <strong>Address:</strong> {{ profile_user.address|default:"Not provided" }}
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-8">
+            <!-- Payment Section -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Record Payment</h6>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        {{ payment_form|crispy }}
+                        <button type="submit" name="payment" class="btn btn-primary mt-3">
+                            <i class="fas fa-money-bill-wave"></i> Record Payment
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Payment History -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Payment History</h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Amount</th>
+                                    <th>Method</th>
+                                    <th>Processed By</th>
+                                    <th>Notes</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for payment in payments %}
+                                <tr>
+                                    <td>{{ payment.payment_date|date:"M d, Y" }}</td>
+                                    <td>${{ payment.amount|floatformat:2 }}</td>
+                                    <td>{{ payment.get_payment_method_display }}</td>
+                                    <td>{{ payment.processed_by.get_full_name }}</td>
+                                    <td>{{ payment.notes|default:"-" }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center">No payments recorded</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notes Section -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Add Note</h6>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        {{ note_form|crispy }}
+                        <button type="submit" name="note" class="btn btn-primary mt-3">
+                            <i class="fas fa-sticky-note"></i> Add Note
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Notes History -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Notes History</h6>
+                </div>
+                <div class="card-body">
+                    {% for note in notes %}
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <p class="card-text">{{ note.note }}</p>
+                                    <small class="text-muted">
+                                        Added by {{ note.created_by.get_full_name }} on {{ note.created_at|date:"M d, Y" }}
+                                    </small>
+                                </div>
+                                {% if request.user.is_librarian or request.user.is_manager %}
+                                <a href="{% url 'account:delete_note' note.pk %}" class="btn btn-sm btn-danger">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p class="text-center">No notes available</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

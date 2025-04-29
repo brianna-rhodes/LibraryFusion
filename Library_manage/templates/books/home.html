@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+
+{% block title %}Welcome to Our Library{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Hero Section -->
+    <div class="jumbotron bg-light p-5 rounded-3 mb-4">
+        <h1 class="display-4">Welcome to Our Library</h1>
+        <p class="lead">Discover a world of knowledge and adventure through our extensive collection of books.</p>
+        <hr class="my-4">
+        <p>Browse our collection, borrow books, and join our community of readers.</p>
+        <a class="btn btn-primary btn-lg" href="{% url 'books:list' %}" role="button">Browse Books</a>
+    </div>
+
+    <!-- Featured Books Section -->
+    <section class="mb-5">
+        <h2 class="mb-4">Featured Books</h2>
+        <div class="row row-cols-1 row-cols-md-3 g-4">
+            {% for book in featured_books %}
+            <div class="col">
+                <div class="card h-100">
+                    {% if book.cover_image %}
+                    <img src="{{ book.cover_image.url }}" class="card-img-top" alt="{{ book.title }}">
+                    {% endif %}
+                    <div class="card-body">
+                        <h5 class="card-title">{{ book.title }}</h5>
+                        <p class="card-text">{{ book.author }}</p>
+                        <a href="{% url 'books:detail' book.pk %}" class="btn btn-outline-primary">View Details</a>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12">
+                <p class="text-muted">No featured books available at the moment.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- Recent Additions Section -->
+    <section class="mb-5">
+        <h2 class="mb-4">Recent Additions</h2>
+        <div class="row row-cols-1 row-cols-md-3 g-4">
+            {% for book in recent_books %}
+            <div class="col">
+                <div class="card h-100">
+                    {% if book.cover_image %}
+                    <img src="{{ book.cover_image.url }}" class="card-img-top" alt="{{ book.title }}">
+                    {% endif %}
+                    <div class="card-body">
+                        <h5 class="card-title">{{ book.title }}</h5>
+                        <p class="card-text">{{ book.author }}</p>
+                        <a href="{% url 'books:detail' book.pk %}" class="btn btn-outline-primary">View Details</a>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12">
+                <p class="text-muted">No recent books available at the moment.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- Popular Books Section -->
+    <section class="mb-5">
+        <h2 class="mb-4">Popular Books</h2>
+        <div class="row row-cols-1 row-cols-md-3 g-4">
+            {% for book in popular_books %}
+            <div class="col">
+                <div class="card h-100">
+                    {% if book.cover_image %}
+                    <img src="{{ book.cover_image.url }}" class="card-img-top" alt="{{ book.title }}">
+                    {% endif %}
+                    <div class="card-body">
+                        <h5 class="card-title">{{ book.title }}</h5>
+                        <p class="card-text">{{ book.author }}</p>
+                        <a href="{% url 'books:detail' book.pk %}" class="btn btn-outline-primary">View Details</a>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12">
+                <p class="text-muted">No popular books available at the moment.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+</div>
+{% endblock %} 

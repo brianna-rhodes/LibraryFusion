@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block title %}Librarian Dashboard{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <nav class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+            <div class="position-sticky pt-3">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" 
+                           href="{% url 'librarians:dashboard' %}">
+                            <i class="fas fa-tachometer-alt"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'manage_books' %}active{% endif %}" 
+                           href="{% url 'librarians:manage_books' %}">
+                            <i class="fas fa-book"></i> Manage Books
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'manage_categories' %}active{% endif %}" 
+                           href="{% url 'librarians:manage_categories' %}">
+                            <i class="fas fa-tags"></i> Manage Categories
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'borrowing_records' %}active{% endif %}" 
+                           href="{% url 'librarians:borrowing_records' %}">
+                            <i class="fas fa-clipboard-list"></i> Borrowing Records
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'manage_fines' %}active{% endif %}" 
+                           href="{% url 'librarians:manage_fines' %}">
+                            <i class="fas fa-money-bill-wave"></i> Manage Fines
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <!-- Main content -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            {% block librarian_content %}
+            {% endblock %}
+        </main>
+    </div>
+</div>
+{% endblock %} 

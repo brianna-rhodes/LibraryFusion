@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ user.get_full_name }}'s Details{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-4">
+            <!-- User Information Card -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">User Information</h6>
+                </div>
+                <div class="card-body">
+                    {% if user.profile_picture %}
+                        <img src="{{ user.profile_picture.url }}" class="rounded-circle mb-3" style="width: 150px; height: 150px; object-fit: cover;">
+                    {% else %}
+                        <div class="rounded-circle bg-light mb-3 d-flex align-items-center justify-content-center" style="width: 150px; height: 150px;">
+                            <i class="fas fa-user fa-3x text-muted"></i>
+                        </div>
+                    {% endif %}
+                    <h5 class="card-title">{{ user.get_full_name }}</h5>
+                    <p class="card-text">
+                        <strong>Username:</strong> {{ user.username }}<br>
+                        <strong>Email:</strong> {{ user.email }}<br>
+                        <strong>Role:</strong> {{ user.get_role_display }}<br>
+                        <strong>Fine Balance:</strong> ${{ user.fine_balance|floatformat:2 }}<br>
+                        <strong>Phone:</strong> {{ user.phone_number|default:"Not provided" }}<br>
+                        <strong>Address:</strong> {{ user.address|default:"Not provided" }}
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-8">
+            <!-- Current Borrowings -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Current Borrowings</h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Book</th>
+                                    <th>Borrowed Date</th>
+                                    <th>Due Date</th>
+                                    <th>Fine</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for record in current_borrowings %}
+                                <tr>
+                                    <td>{{ record.book.title }}</td>
+                                    <td>{{ record.borrowed_date|date:"M d, Y" }}</td>
+                                    <td>{{ record.due_date|date:"M d, Y" }}</td>
+                                    <td>${{ record.fine_amount|floatformat:2 }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="4" class="text-center">No current borrowings</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Borrowing History -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Borrowing History</h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Book</th>
+                                    <th>Borrowed Date</th>
+                                    <th>Returned Date</th>
+                                    <th>Status</th>
+                                    <th>Fine</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for record in borrowing_history %}
+                                <tr>
+                                    <td>{{ record.book.title }}</td>
+                                    <td>{{ record.borrowed_date|date:"M d, Y" }}</td>
+                                    <td>{{ record.return_date|date:"M d, Y"|default:"-" }}</td>
+                                    <td>
+                                        <span class="badge {% if record.status == 'BORROWED' %}bg-primary
+                                                          {% elif record.status == 'RETURNED' %}bg-success
+                                                          {% else %}bg-danger{% endif %}">
+                                            {{ record.get_status_display }}
+                                        </span>
+                                    </td>
+                                    <td>${{ record.fine_amount|floatformat:2 }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center">No borrowing history</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

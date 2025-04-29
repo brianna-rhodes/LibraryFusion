@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Books - Library Management System{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-md-8 mx-auto">
+            <form method="get" class="search-form">
+                <div class="input-group">
+                    {{ search_form.query }}
+                    {{ search_form.category }}
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search"></i> Search
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="row">
+        {% for book in books %}
+        <div class="col-md-4 mb-4">
+            <div class="card book-card h-100">
+                {% if book.cover_image %}
+                <img src="{{ book.cover_image.url }}" class="card-img-top book-cover" alt="{{ book.title }}">
+                {% else %}
+                <div class="card-img-top book-cover bg-light d-flex align-items-center justify-content-center">
+                    <i class="fas fa-book fa-3x text-muted"></i>
+                </div>
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title">{{ book.title }}</h5>
+                    <p class="card-text text-muted">by {{ book.author }}</p>
+                    <p class="card-text">
+                        <small class="text-muted">
+                            Category: {{ book.category.name|default:"Uncategorized" }}
+                        </small>
+                    </p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="badge {% if book.available_copies > 0 %}bg-success{% else %}bg-danger{% endif %}">
+                            {{ book.available_copies }} available
+                        </span>
+                        <a href="{% url 'books:detail' book.pk %}" class="btn btn-outline-primary btn-sm">
+                            View Details
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="alert alert-info">
+                No books found matching your search criteria.
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% if books.has_other_pages %}
+    <nav aria-label="Page navigation" class="mt-4">
+        <ul class="pagination justify-content-center">
+            {% if books.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ books.previous_page_number }}{% if request.GET.query %}&query={{ request.GET.query }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}">
+                    Previous
+                </a>
+            </li>
+            {% endif %}
+
+            {% for num in books.paginator.page_range %}
+            <li class="page-item {% if books.number == num %}active{% endif %}">
+                <a class="page-link" href="?page={{ num }}{% if request.GET.query %}&query={{ request.GET.query }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}">
+                    {{ num }}
+                </a>
+            </li>
+            {% endfor %}
+
+            {% if books.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ books.next_page_number }}{% if request.GET.query %}&query={{ request.GET.query }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}">
+                    Next
+                </a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+{% endblock %} 

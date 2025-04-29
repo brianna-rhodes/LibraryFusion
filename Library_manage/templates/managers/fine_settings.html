@@ -1,0 +1,70 @@
+{% extends 'managers/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Fine Settings{% endblock %}
+
+{% block manager_content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Fine Settings</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <a href="{% url 'managers:settings' %}" class="btn btn-sm btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Settings
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card shadow">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Configure Fine Rules</h6>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    {{ form|crispy }}
+                    <div class="mt-4">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Save Settings
+                        </button>
+                        <a href="{% url 'managers:settings' %}" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Current Settings -->
+        <div class="card shadow mt-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Current Settings</h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <strong>Daily Fine Rate:</strong>
+                            <p class="text-muted">The amount charged per day for overdue books</p>
+                        </div>
+                        <div class="mb-3">
+                            <strong>Grace Period:</strong>
+                            <p class="text-muted">Number of days before fines start accumulating</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <strong>Maximum Fine:</strong>
+                            <p class="text-muted">The maximum fine amount that can be charged per book</p>
+                        </div>
+                        <div class="mb-3">
+                            <strong>Fine Payment Due Days:</strong>
+                            <p class="text-muted">Number of days given to pay fines before additional penalties</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

@@ -1,0 +1,100 @@
+/* General Styles */
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    flex: 1;
+}
+
+/* Book Cards */
+.book-card {
+    transition: transform 0.2s;
+    height: 100%;
+}
+
+.book-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.book-cover {
+    height: 300px;
+    object-fit: cover;
+}
+
+/* Profile Picture */
+.profile-picture {
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+/* Dashboard Cards */
+.dashboard-card {
+    transition: transform 0.2s;
+}
+
+.dashboard-card:hover {
+    transform: translateY(-3px);
+}
+
+/* Custom Button Styles */
+.btn-custom {
+    padding: 0.5rem 1.5rem;
+    border-radius: 0.25rem;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .book-cover {
+        height: 200px;
+    }
+    
+    .profile-picture {
+        width: 100px;
+        height: 100px;
+    }
+}
+
+/* Loading Spinner */
+.loading-spinner {
+    width: 3rem;
+    height: 3rem;
+}
+
+/* Custom Alert Styles */
+.alert-custom {
+    border-left: 4px solid;
+}
+
+/* Book Search Form */
+.search-form {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* Review Stars */
+.star-rating {
+    color: #ffc107;
+}
+
+/* Fine Notice */
+.fine-notice {
+    background-color: #fff3cd;
+    border-left: 4px solid #ffc107;
+}
+
+/* Mobile Navigation */
+@media (max-width: 576px) {
+    .navbar-brand {
+        font-size: 1.2rem;
+    }
+    
+    .nav-link {
+        padding: 0.5rem 1rem;
+    }
+} 

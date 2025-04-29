@@ -1,0 +1,157 @@
+{% extends 'librarians/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}{% if form.instance.pk %}Edit{% else %}Add{% endif %} Book{% endblock %}
+
+{% block librarian_content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">{% if form.instance.pk %}Edit{% else %}Add{% endif %} Book</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <a href="{% url 'librarians:manage_books' %}" class="btn btn-sm btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Books
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <!-- Google Books Search -->
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Search Google Books</h6>
+            </div>
+            <div class="card-body">
+                <div class="input-group mb-3">
+                    <input type="text" id="googleBooksSearch" class="form-control" placeholder="Search by title, author, or ISBN...">
+                    <button class="btn btn-primary" type="button" id="searchGoogleBooks">
+                        <i class="fas fa-search"></i> Search
+                    </button>
+                </div>
+                <div id="googleBooksResults" class="mt-3" style="display: none;">
+                    <h6 class="mb-3">Search Results</h6>
+                    <div id="searchResults" class="list-group">
+                        <!-- Results will be populated here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Book Form -->
+        <div class="card shadow">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Book Information</h6>
+            </div>
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data" id="bookForm">
+                    {% csrf_token %}
+                    {{ form|crispy }}
+                    <div class="mt-4">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> {% if form.instance.pk %}Update{% else %}Create{% endif %} Book
+                        </button>
+                        <a href="{% url 'librarians:manage_books' %}" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Help Information -->
+        <div class="card shadow mt-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Information</h6>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <h5><i class="fas fa-info-circle"></i> Important Notes</h5>
+                    <ul class="mb-0">
+                        <li>Make sure to provide accurate book information</li>
+                        <li>Upload a clear cover image for better visibility</li>
+                        <li>Set the correct number of total and available copies</li>
+                        <li>Choose the appropriate category for easy organization</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchButton = document.getElementById('searchGoogleBooks');
+    const searchInput = document.getElementById('googleBooksSearch');
+    const resultsDiv = document.getElementById('googleBooksResults');
+    const searchResults = document.getElementById('searchResults');
+    const bookForm = document.getElementById('bookForm');
+
+    searchButton.addEventListener('click', function() {
+        const query = searchInput.value.trim();
+        if (query) {
+            fetch(`/librarians/books/search/?q=${encodeURIComponent(query)}`)
+                .then(response => response.json())
+                .then(data => {
+                    searchResults.innerHTML = '';
+                    if (data.books && data.books.length > 0) {
+                        data.books.forEach(book => {
+                            const bookElement = document.createElement('div');
+                            bookElement.className = 'list-group-item';
+                            bookElement.innerHTML = `
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-1">${book.title}</h6>
+                                        <small class="text-muted">${book.authors.join(', ')}</small>
+                                    </div>
+                                    <button class="btn btn-sm btn-primary import-book" 
+                                            data-book-id="${book.google_books_id}">
+                                        <i class="fas fa-file-import"></i> Import
+                                    </button>
+                                </div>
+                            `;
+                            searchResults.appendChild(bookElement);
+                        });
+                        resultsDiv.style.display = 'block';
+                    } else {
+                        searchResults.innerHTML = '<div class="alert alert-info">No books found.</div>';
+                        resultsDiv.style.display = 'block';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    searchResults.innerHTML = '<div class="alert alert-danger">Error searching for books.</div>';
+                    resultsDiv.style.display = 'block';
+                });
+        }
+    });
+
+    // Handle book import
+    searchResults.addEventListener('click', function(e) {
+        if (e.target.closest('.import-book')) {
+            const bookId = e.target.closest('.import-book').dataset.bookId;
+            fetch(`/librarians/books/import/${bookId}/`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Populate form fields
+                        document.getElementById('id_title').value = data.book.title;
+                        document.getElementById('id_author').value = data.book.authors.join(', ');
+                        document.getElementById('id_isbn').value = data.book.isbn;
+                        document.getElementById('id_description').value = data.book.description;
+                        // You can add more fields as needed
+                        
+                        // Hide search results
+                        resultsDiv.style.display = 'none';
+                        searchInput.value = '';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error importing book details.');
+                });
+        }
+    });
+});
+</script>
+{% endblock %} 

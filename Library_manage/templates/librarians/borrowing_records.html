@@ -1,0 +1,96 @@
+{% extends 'librarians/base.html' %}
+
+{% block title %}Borrowing Records{% endblock %}
+
+{% block librarian_content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Borrowing Records</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <div class="btn-group me-2">
+            <a href="{% url 'librarians:borrowing_records' %}?status=active" class="btn btn-sm btn-outline-primary {% if status == 'active' %}active{% endif %}">
+                Active
+            </a>
+            <a href="{% url 'librarians:borrowing_records' %}?status=overdue" class="btn btn-sm btn-outline-danger {% if status == 'overdue' %}active{% endif %}">
+                Overdue
+            </a>
+            <a href="{% url 'librarians:borrowing_records' %}?status=completed" class="btn btn-sm btn-outline-success {% if status == 'completed' %}active{% endif %}">
+                Completed
+            </a>
+            <a href="{% url 'librarians:borrowing_records' %}" class="btn btn-sm btn-outline-secondary">
+                All
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">Borrowing History</h6>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered" id="borrowingTable" width="100%" cellspacing="0">
+                <thead>
+                    <tr>
+                        <th>Book</th>
+                        <th>Borrower</th>
+                        <th>Borrow Date</th>
+                        <th>Due Date</th>
+                        <th>Return Date</th>
+                        <th>Status</th>
+                        <th>Fine</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for record in borrowing_records %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'librarians:book_detail' record.book.pk %}">{{ record.book.title }}</a>
+                        </td>
+                        <td>
+                            <a href="{% url 'librarians:user_detail' record.borrower.pk %}">{{ record.borrower.get_full_name }}</a>
+                        </td>
+                        <td>{{ record.borrow_date|date:"M d, Y" }}</td>
+                        <td>{{ record.due_date|date:"M d, Y" }}</td>
+                        <td>{{ record.return_date|date:"M d, Y"|default:"-" }}</td>
+                        <td>
+                            {% if record.is_overdue %}
+                            <span class="badge bg-danger">Overdue</span>
+                            {% elif record.return_date %}
+                            <span class="badge bg-success">Completed</span>
+                            {% else %}
+                            <span class="badge bg-primary">Active</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if record.fine_amount %}
+                            ${{ record.fine_amount }}
+                            {% else %}
+                            -
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if not record.return_date %}
+                            <a href="{% url 'librarians:return_book' record.pk %}" class="btn btn-sm btn-success">
+                                <i class="fas fa-undo"></i> Return
+                            </a>
+                            {% endif %}
+                            {% if record.is_overdue and not record.fine_amount %}
+                            <a href="{% url 'librarians:add_fine' record.pk %}" class="btn btn-sm btn-warning">
+                                <i class="fas fa-exclamation-triangle"></i> Add Fine
+                            </a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="text-center">No borrowing records found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %} 

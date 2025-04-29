@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Borrow {{ book.title }} - Library Management System{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="text-center">Confirm Book Borrowing</h3>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        {% if book.cover_image %}
+                        <img src="{{ book.cover_image.url }}" class="img-fluid rounded" style="max-height: 200px;" alt="{{ book.title }}">
+                        {% else %}
+                        <div class="bg-light rounded p-4 text-center">
+                            <i class="fas fa-book fa-3x text-muted"></i>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <h4 class="text-center mb-3">{{ book.title }}</h4>
+                    <p class="text-center text-muted">by {{ book.author }}</p>
+                    
+                    <div class="alert alert-info">
+                        <h5 class="alert-heading">Borrowing Terms</h5>
+                        <ul class="mb-0">
+                            <li>Borrowing period: 14 days</li>
+                            <li>Fine for late return: $1 per day</li>
+                            <li>Maximum fine: $20 per book</li>
+                        </ul>
+                    </div>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-check"></i> Confirm Borrowing
+                            </button>
+                            <a href="{% url 'books:detail' book.pk %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-times"></i> Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 
