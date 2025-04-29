@@ -172,3 +172,17 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*.pyc
+
+# Distribution / packaging
+*.egg
+*.egg-info/
+dist/
+build/
+
+# VSCode settings (optional)
+.vscode/
