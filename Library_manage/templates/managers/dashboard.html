@@ -130,22 +130,22 @@
                 <div class="row">
                     <div class="col-md-3 mb-3">
                         <a href="{% url 'managers:add_librarian' %}" class="btn btn-primary btn-block">
-                            <i class="fas fa-user-plus me-2"></i> Add Librarian
+                            <i class="fas fa-user-plus"></i> Add Librarian
                         </a>
                     </div>
                     <div class="col-md-3 mb-3">
                         <a href="{% url 'managers:borrowing_report' %}" class="btn btn-info btn-block">
-                            <i class="fas fa-chart-line me-2"></i> View Borrowing Report
+                            <i class="fas fa-chart-line"></i> View Borrowing Report
                         </a>
                     </div>
                     <div class="col-md-3 mb-3">
                         <a href="{% url 'managers:fine_report' %}" class="btn btn-warning btn-block">
-                            <i class="fas fa-money-bill-wave me-2"></i> View Fine Report
+                            <i class="fas fa-money-bill-wave"></i> View Fine Report
                         </a>
                     </div>
                     <div class="col-md-3 mb-3">
                         <a href="{% url 'managers:settings' %}" class="btn btn-secondary btn-block">
-                            <i class="fas fa-cog me-2"></i> System Settings
+                            <i class="fas fa-cog"></i> System Settings
                         </a>
                     </div>
                 </div>
@@ -153,35 +153,4 @@
         </div>
     </div>
 </div>
-
-<style>
-    .btn-block {
-        width: 100%;
-        padding: 0.75rem;
-    }
-    
-    .text-gray-300 {
-        color: #dddfeb !important;
-    }
-    
-    .text-gray-800 {
-        color: #5a5c69 !important;
-    }
-    
-    .border-left-primary {
-        border-left: 0.25rem solid var(--primary-color) !important;
-    }
-    
-    .border-left-success {
-        border-left: 0.25rem solid var(--success-color) !important;
-    }
-    
-    .border-left-info {
-        border-left: 0.25rem solid var(--info-color) !important;
-    }
-    
-    .border-left-warning {
-        border-left: 0.25rem solid var(--warning-color) !important;
-    }
-</style>
 {% endblock %} 
