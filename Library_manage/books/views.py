@@ -1,0 +1,227 @@
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.db.models import Q
+from django.core.paginator import Paginator
+from django.utils import timezone
+from datetime import timedelta
+from .models import Book, Category, BorrowingRecord, Order
+from .forms import BookSearchForm, BorrowBookForm, OrderForm
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.views.generic import ListView, CreateView, UpdateView
+from django.urls import reverse_lazy
+
+def book_list(request):
+    books = Book.objects.all()
+    categories = Category.objects.all()
+    search_form = BookSearchForm(request.GET)
+    
+    if search_form.is_valid():
+        query = search_form.cleaned_data.get('query')
+        category = search_form.cleaned_data.get('category')
+        
+        if query:
+            books = books.filter(
+                Q(title__icontains=query) |
+                Q(author__icontains=query) |
+                Q(isbn__icontains=query)
+            )
+        
+        if category:
+            books = books.filter(category=category)
+    
+    # Pagination
+    paginator = Paginator(books, 12)  # Show 12 books per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    context = {
+        'books': page_obj,
+        'categories': categories,
+        'search_form': search_form,
+    }
+    return render(request, 'books/book_list.html', context)
+
+def book_detail(request, pk):
+    book = get_object_or_404(Book, pk=pk)
+    reviews = book.reviews.all()
+    is_available = book.available_copies > 0
+    can_borrow = request.user.is_authenticated and request.user.is_student and is_available
+    
+    # Check if user has already borrowed this book
+    has_borrowed = False
+    if request.user.is_authenticated:
+        has_borrowed = BorrowingRecord.objects.filter(
+            book=book,
+            borrower=request.user,
+            status='BORROWED'
+        ).exists()
+    
+    context = {
+        'book': book,
+        'reviews': reviews,
+        'is_available': is_available,
+        'can_borrow': can_borrow,
+        'has_borrowed': has_borrowed,
+    }
+    return render(request, 'books/book_detail.html', context)
+
+@login_required
+def borrow_book(request, pk):
+    if not request.user.is_student:
+        messages.error(request, 'Only students can borrow books.')
+        return redirect('books:list')
+    
+    book = get_object_or_404(Book, pk=pk)
+    
+    if book.available_copies <= 0:
+        messages.error(request, 'This book is not available for borrowing.')
+        return redirect('books:detail', pk=pk)
+    
+    # Check if user has already borrowed this book
+    if BorrowingRecord.objects.filter(book=book, borrower=request.user, status='BORROWED').exists():
+        messages.error(request, 'You have already borrowed this book.')
+        return redirect('books:detail', pk=pk)
+    
+    if request.method == 'POST':
+        form = BorrowBookForm(request.POST)
+        if form.is_valid():
+            borrowing_record = form.save(commit=False)
+            borrowing_record.book = book
+            borrowing_record.borrower = request.user
+            borrowing_record.due_date = timezone.now() + timedelta(days=14)  # 2 weeks borrowing period
+            borrowing_record.save()
+            
+            # Update available copies
+            book.available_copies -= 1
+            book.save()
+            
+            messages.success(request, 'Book borrowed successfully!')
+            return redirect('books:my_books')
+    else:
+        form = BorrowBookForm()
+    
+    context = {
+        'book': book,
+        'form': form,
+    }
+    return render(request, 'books/borrow_book.html', context)
+
+@login_required
+def my_books(request):
+    if not request.user.is_student:
+        messages.error(request, 'Only students can view their borrowed books.')
+        return redirect('books:list')
+    
+    borrowed_books = BorrowingRecord.objects.filter(
+        borrower=request.user,
+        status='BORROWED'
+    ).select_related('book')
+    
+    context = {
+        'borrowed_books': borrowed_books,
+    }
+    return render(request, 'books/my_books.html', context)
+
+@login_required
+def return_book(request, pk):
+    borrowing_record = get_object_or_404(BorrowingRecord, pk=pk, borrower=request.user)
+    
+    if borrowing_record.status != 'BORROWED':
+        messages.error(request, 'This book has already been returned.')
+        return redirect('books:my_books')
+    
+    # Calculate fine if overdue
+    if timezone.now() > borrowing_record.due_date:
+        days_overdue = (timezone.now() - borrowing_record.due_date).days
+        fine = days_overdue * 1.00  # $1 per day fine
+        borrowing_record.fine_amount = fine
+        request.user.fine_balance += fine
+        request.user.save()
+    
+    # Update borrowing record
+    borrowing_record.status = 'RETURNED'
+    borrowing_record.return_date = timezone.now()
+    borrowing_record.save()
+    
+    # Update available copies
+    book = borrowing_record.book
+    book.available_copies += 1
+    book.save()
+    
+    messages.success(request, 'Book returned successfully!')
+    return redirect('books:my_books')
+
+def home(request):
+    """
+    Main page view that displays featured books, recent additions, and other highlights.
+    """
+    # Get books with lowest available copies as featured (most borrowed)
+    featured_books = Book.objects.order_by('available_copies')[:6]
+    recent_books = Book.objects.order_by('-created_at')[:6]
+    # Get books with lowest available copies as popular
+    popular_books = Book.objects.order_by('available_copies')[:6]
+    
+    context = {
+        'featured_books': featured_books,
+        'recent_books': recent_books,
+        'popular_books': popular_books,
+    }
+    return render(request, 'books/home.html', context)
+
+class OrderListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
+    model = Order
+    template_name = 'books/order_list.html'
+    context_object_name = 'orders'
+    
+    def test_func(self):
+        return self.request.user.is_manager
+    
+    def get_queryset(self):
+        return Order.objects.filter(manager=self.request.user)
+
+class OrderCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
+    model = Order
+    form_class = OrderForm
+    template_name = 'books/order_form.html'
+    success_url = reverse_lazy('books:order_list')
+    
+    def test_func(self):
+        return self.request.user.is_manager
+    
+    def form_valid(self, form):
+        form.instance.manager = self.request.user
+        messages.success(self.request, 'Order created successfully!')
+        return super().form_valid(form)
+
+class OrderUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    model = Order
+    form_class = OrderForm
+    template_name = 'books/order_form.html'
+    success_url = reverse_lazy('books:order_list')
+    
+    def test_func(self):
+        return self.request.user.is_manager and self.get_object().manager == self.request.user
+    
+    def form_valid(self, form):
+        messages.success(self.request, 'Order updated successfully!')
+        return super().form_valid(form)
+
+@login_required
+def delete_book(request, pk):
+    book = get_object_or_404(Book, pk=pk)
+    
+    # Check if user is a manager
+    if not request.user.is_manager:
+        messages.error(request, 'Only managers can delete books.')
+        return redirect('books:detail', pk=pk)
+    
+    # Check if book is currently borrowed
+    if BorrowingRecord.objects.filter(book=book, status='BORROWED').exists():
+        messages.error(request, 'Cannot delete book that is currently borrowed.')
+        return redirect('books:detail', pk=pk)
+    
+    # Delete the book
+    book.delete()
+    messages.success(request, 'Book deleted successfully.')
+    return redirect('books:list')
