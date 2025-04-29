@@ -1,0 +1,66 @@
+{% extends 'managers/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}System Settings{% endblock %}
+
+{% block manager_content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">System Settings</h1>
+</div>
+
+<div class="row">
+    <!-- Borrowing Settings -->
+    <div class="col-md-6 mb-4">
+        <div class="card shadow">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Borrowing Settings</h6>
+            </div>
+            <div class="card-body">
+                <form method="post" action="{% url 'managers:borrowing_settings' %}">
+                    {% csrf_token %}
+                    {{ borrowing_form|crispy }}
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Save Borrowing Settings
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fine Settings -->
+    <div class="col-md-6 mb-4">
+        <div class="card shadow">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Fine Settings</h6>
+            </div>
+            <div class="card-body">
+                <form method="post" action="{% url 'managers:fine_settings' %}">
+                    {% csrf_token %}
+                    {{ fine_form|crispy }}
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Save Fine Settings
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- System Settings -->
+    <div class="col-md-6 mb-4">
+        <div class="card shadow">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">System Settings</h6>
+            </div>
+            <div class="card-body">
+                <form method="post" action="{% url 'managers:settings' %}">
+                    {% csrf_token %}
+                    {{ system_form|crispy }}
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Save System Settings
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 
