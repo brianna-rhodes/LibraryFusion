@@ -8,6 +8,7 @@ from django.contrib import messages
 from django.http import JsonResponse
 from .forms import UserRegistrationForm, UserLoginForm, UserProfileForm, PaymentForm, UserNoteForm
 from .models import User, Payment, UserNote
+from django.contrib.auth.views import LoginView
 
 def register(request):
     if request.user.is_authenticated:
@@ -109,3 +110,15 @@ def delete_note(request, pk):
         note.delete()
         messages.success(request, 'Note deleted successfully!')
     return redirect('account:user_profile', pk=note.user.pk)
+
+class CustomLoginView(LoginView):
+    template_name = 'account/login.html'
+    
+    def get_success_url(self):
+        user = self.request.user
+        if user.role == 'MANAGER':
+            return reverse_lazy('managers:dashboard')
+        elif user.role == 'LIBRARIAN':
+            return reverse_lazy('librarians:dashboard')
+        else:
+            return reverse_lazy('books:home')
