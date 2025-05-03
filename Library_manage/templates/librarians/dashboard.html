@@ -2,7 +2,7 @@
 
 {% block title %}Librarian Dashboard{% endblock %}
 
-{% block content %}
+{% block librarian_content %}
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
     <h1 class="h2">Dashboard</h1>
 </div>
@@ -11,6 +11,28 @@
 {% include 'shared/google_books_search.html' %}
 
 <div class="row">
+    <!-- Quick Actions -->
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Quick Actions</h6>
+            </div>
+            <div class="card-body">
+                <div class="d-flex gap-2">
+                    <a href="{% url 'books:add' %}" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Add New Book
+                    </a>
+                    <a href="{% url 'books:list' %}" class="btn btn-info">
+                        <i class="fas fa-book"></i> View All Books
+                    </a>
+                    <a href="{% url 'librarians:borrowing_report' %}" class="btn btn-success">
+                        <i class="fas fa-chart-bar"></i> Borrowing Report
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Total Books Card -->
     <div class="col-xl-3 col-md-6 mb-4">
         <div class="card border-left-primary shadow h-100 py-2">
