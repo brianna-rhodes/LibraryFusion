@@ -29,6 +29,13 @@
                         <strong>Phone:</strong> {{ profile_user.phone_number|default:"Not provided" }}<br>
                         <strong>Address:</strong> {{ profile_user.address|default:"Not provided" }}
                     </p>
+                    {% if profile_user.role == 'STUDENT' %}
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'books:my_books' %}" class="btn btn-primary">
+                            <i class="fas fa-book"></i> My Books
+                        </a>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
