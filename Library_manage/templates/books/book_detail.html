@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load crispy_forms_tags %}
 
-{% block title %}{{ book.title }} - Library Management System{% endblock %}
+{% block title %}{{ book.title }} - LibraryFusion{% endblock %}
 
 {% block content %}
 <div class="container">
@@ -97,4 +97,91 @@
         </div>
     </div>
 </div>
+
+<!-- Reviews Section -->
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">Reviews</h6>
+    </div>
+    <div class="card-body">
+        {% if user.is_authenticated and user.role == 'STUDENT' %}
+            <div class="mb-4">
+                <h5>Write a Review</h5>
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="id_rating" class="form-label">Rating</label>
+                        <div class="rating-input">
+                            {% for i in "12345"|make_list %}
+                                <i class="far fa-star star-rating" data-value="{{ forloop.counter }}"></i>
+                            {% endfor %}
+                        </div>
+                        <input type="hidden" name="rating" id="id_rating" value="5">
+                    </div>
+                    <div class="mb-3">
+                        <label for="id_comment" class="form-label">Comment</label>
+                        <textarea name="comment" id="id_comment" class="form-control" rows="4" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-paper-plane"></i> Submit Review
+                    </button>
+                </form>
+            </div>
+        {% endif %}
+
+        <div class="reviews-list">
+            <h5>Customer Reviews</h5>
+            {% for review in reviews %}
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h6 class="mb-1">{{ review.user.get_full_name }}</h6>
+                                <div class="mb-2">
+                                    {% for i in "12345"|make_list %}
+                                        {% if forloop.counter <= review.rating %}
+                                            <i class="fas fa-star text-warning"></i>
+                                        {% else %}
+                                            <i class="far fa-star text-warning"></i>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                                <p class="mb-0">{{ review.comment }}</p>
+                            </div>
+                            <small class="text-muted">{{ review.created_at|date:"M d, Y" }}</small>
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <p class="text-center">No reviews yet. Be the first to review this book!</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const stars = document.querySelectorAll('.star-rating');
+        const ratingInput = document.getElementById('id_rating');
+        
+        stars.forEach(star => {
+            star.addEventListener('click', function() {
+                const value = this.getAttribute('data-value');
+                ratingInput.value = value;
+                
+                stars.forEach(s => {
+                    if (s.getAttribute('data-value') <= value) {
+                        s.classList.remove('far');
+                        s.classList.add('fas');
+                    } else {
+                        s.classList.remove('fas');
+                        s.classList.add('far');
+                    }
+                });
+            });
+        });
+    });
+</script>
+{% endblock %}
 {% endblock %} 
