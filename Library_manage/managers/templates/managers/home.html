@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Manager Home{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <!-- Quick Stats -->
+        <div class="col-md-12 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h4>Quick Stats</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="card bg-primary text-white">
+                                <div class="card-body">
+                                    <h5>Total Books</h5>
+                                    <h3>{{ total_books }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-success text-white">
+                                <div class="card-body">
+                                    <h5>Borrowed Books</h5>
+                                    <h3>{{ total_borrowed }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-danger text-white">
+                                <div class="card-body">
+                                    <h5>Overdue Books</h5>
+                                    <h3>{{ overdue_books }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-info text-white">
+                                <div class="card-body">
+                                    <h5>Total Users</h5>
+                                    <h3>{{ total_users }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h4>Quick Actions</h4>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'managers:dashboard' %}" class="btn btn-primary">
+                            <i class="fas fa-tachometer-alt"></i> Go to Dashboard
+                        </a>
+                        <a href="{% url 'managers:settings' %}" class="btn btn-info">
+                            <i class="fas fa-cog"></i> System Settings
+                        </a>
+                        <a href="{% url 'managers:manage_librarians' %}" class="btn btn-success">
+                            <i class="fas fa-users"></i> Manage Librarians
+                        </a>
+                        <a href="{% url 'managers:manage_users' %}" class="btn btn-warning">
+                            <i class="fas fa-user-cog"></i> Manage Users
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h4>Recent Activity</h4>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Book</th>
+                                    <th>User</th>
+                                    <th>Borrowed Date</th>
+                                    <th>Due Date</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for record in recent_activity %}
+                                <tr>
+                                    <td>{{ record.book.title }}</td>
+                                    <td>{{ record.borrower.username }}</td>
+                                    <td>{{ record.borrowed_date|date:"Y-m-d" }}</td>
+                                    <td>{{ record.due_date|date:"Y-m-d" }}</td>
+                                    <td>
+                                        {% if record.status == 'BORROWED' %}
+                                            <span class="badge bg-success">Borrowed</span>
+                                        {% elif record.status == 'RETURNED' %}
+                                            <span class="badge bg-info">Returned</span>
+                                        {% elif record.status == 'OVERDUE' %}
+                                            <span class="badge bg-danger">Overdue</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 
