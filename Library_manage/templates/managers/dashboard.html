@@ -1,152 +1,155 @@
-{% extends 'managers/base.html' %}
+{% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Manager Dashboard{% endblock %}
 
-{% block manager_content %}
-<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-    <h1 class="h2">Dashboard</h1>
-</div>
-
-<!-- Quick Book Import -->
-{% include 'shared/google_books_search.html' %}
-
-<div class="row">
-    <!-- Total Books Card -->
-    <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card border-left-primary shadow h-100 py-2">
-            <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                            Total Books</div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_books }}</div>
-                    </div>
-                    <div class="col-auto">
-                        <i class="fas fa-book fa-2x text-gray-300"></i>
-                    </div>
-                </div>
-            </div>
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h1>Manager Dashboard</h1>
+            <p class="lead">LibraryFusion</p>
         </div>
     </div>
 
-    <!-- Borrowed Books Card -->
-    <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card border-left-success shadow h-100 py-2">
-            <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                            Borrowed Books</div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_borrowed }}</div>
-                    </div>
-                    <div class="col-auto">
-                        <i class="fas fa-book-reader fa-2x text-gray-300"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Total Users Card -->
-    <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card border-left-info shadow h-100 py-2">
-            <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
-                            Total Users</div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_users }}</div>
-                    </div>
-                    <div class="col-auto">
-                        <i class="fas fa-users fa-2x text-gray-300"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Total Librarians Card -->
-    <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card border-left-warning shadow h-100 py-2">
-            <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
-                            Total Librarians</div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_librarians }}</div>
-                    </div>
-                    <div class="col-auto">
-                        <i class="fas fa-user-tie fa-2x text-gray-300"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Recent Activity -->
-<div class="card shadow mb-4">
-    <div class="card-header py-3">
-        <h6 class="m-0 font-weight-bold text-primary">Recent Activity</h6>
-    </div>
-    <div class="card-body">
-        <div class="table-responsive">
-            <table class="table table-bordered" width="100%" cellspacing="0">
-                <thead>
-                    <tr>
-                        <th>User</th>
-                        <th>Action</th>
-                        <th>Details</th>
-                        <th>Date</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for activity in recent_activity %}
-                    <tr>
-                        <td>{{ activity.user.get_full_name }}</td>
-                        <td>{{ activity.get_action_display }}</td>
-                        <td>{{ activity.details }}</td>
-                        <td>{{ activity.date|date:"M d, Y" }}</td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="4" class="text-center">No recent activity</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
-</div>
-
-<!-- Quick Actions -->
-<div class="row mt-4">
-    <div class="col-12">
-        <div class="card shadow mb-4">
-            <div class="card-header py-3">
-                <h6 class="m-0 font-weight-bold text-primary">Quick Actions</h6>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-3 mb-3">
-                        <a href="{% url 'managers:add_librarian' %}" class="btn btn-primary btn-block">
-                            <i class="fas fa-user-plus"></i> Add Librarian
+    <!-- Quick Actions -->
+    <div class="row mb-4">
+        <div class="col">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Quick Actions</h5>
+                    <div class="d-flex gap-2">
+                        <a href="{% url 'managers:manage_librarians' %}" class="btn btn-primary">
+                            <i class="fas fa-users"></i> Manage Librarians
                         </a>
-                    </div>
-                    <div class="col-md-3 mb-3">
-                        <a href="{% url 'managers:borrowing_report' %}" class="btn btn-info btn-block">
-                            <i class="fas fa-chart-line"></i> View Borrowing Report
+                        <a href="{% url 'managers:manage_users' %}" class="btn btn-secondary">
+                            <i class="fas fa-user-friends"></i> Manage Users
                         </a>
-                    </div>
-                    <div class="col-md-3 mb-3">
-                        <a href="{% url 'managers:fine_report' %}" class="btn btn-warning btn-block">
-                            <i class="fas fa-money-bill-wave"></i> View Fine Report
-                        </a>
-                    </div>
-                    <div class="col-md-3 mb-3">
-                        <a href="{% url 'managers:settings' %}" class="btn btn-secondary btn-block">
+                        <a href="{% url 'managers:settings' %}" class="btn btn-info">
                             <i class="fas fa-cog"></i> System Settings
                         </a>
+                        <a href="{% url 'managers:export_report' 'borrowings' %}" class="btn btn-success">
+                            <i class="fas fa-file-export"></i> Export Reports
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Management Sections -->
+    <div class="row mb-4">
+        <!-- Librarian Management -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Librarian Management</h5>
+                    <div class="list-group">
+                        <a href="{% url 'managers:add_librarian' %}" class="list-group-item list-group-item-action">
+                            <i class="fas fa-user-plus"></i> Add New Librarian
+                        </a>
+                        <a href="{% url 'managers:manage_librarians' %}" class="list-group-item list-group-item-action">
+                            <i class="fas fa-list"></i> View All Librarians
+                        </a>
+                        <a href="{% url 'managers:borrowing_report' %}" class="list-group-item list-group-item-action">
+                            <i class="fas fa-chart-bar"></i> Borrowing Report
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- User Management -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">User Management</h5>
+                    <div class="list-group">
+                        <a href="{% url 'managers:manage_users' %}" class="list-group-item list-group-item-action">
+                            <i class="fas fa-users"></i> View All Users
+                        </a>
+                        <a href="{% url 'managers:fine_report' %}" class="list-group-item list-group-item-action">
+                            <i class="fas fa-money-bill-wave"></i> Fine Report
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- System Management -->
+    <div class="row mb-4">
+        <div class="col">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">System Management</h5>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="list-group">
+                                <a href="{% url 'managers:settings' %}" class="list-group-item list-group-item-action">
+                                    <i class="fas fa-cog"></i> General Settings
+                                </a>
+                                <a href="{% url 'managers:borrowing_settings' %}" class="list-group-item list-group-item-action">
+                                    <i class="fas fa-book"></i> Borrowing Rules
+                                </a>
+                                <a href="{% url 'managers:fine_settings' %}" class="list-group-item list-group-item-action">
+                                    <i class="fas fa-money-bill-alt"></i> Fine Settings
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="list-group">
+                                <a href="{% url 'managers:export_report' 'borrowings' %}" class="list-group-item list-group-item-action">
+                                    <i class="fas fa-file-csv"></i> Export Borrowings
+                                </a>
+                                <a href="{% url 'managers:export_report' 'inventory' %}" class="list-group-item list-group-item-action">
+                                    <i class="fas fa-file-csv"></i> Export Inventory
+                                </a>
+                                <a href="{% url 'managers:export_report' 'users' %}" class="list-group-item list-group-item-action">
+                                    <i class="fas fa-file-csv"></i> Export User Data
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="list-group">
+                                <a href="{% url 'managers:admin_panel' %}" class="list-group-item list-group-item-action">
+                                    <i class="fas fa-tools"></i> System Maintenance
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="row">
+        <div class="col">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Recent Activity</h5>
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Action</th>
+                                    <th>User</th>
+                                    <th>Details</th>
+                                    <th>Time</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for activity in recent_activity %}
+                                <tr>
+                                    <td>{{ activity.action }}</td>
+                                    <td>{{ activity.user.username }}</td>
+                                    <td>{{ activity.details }}</td>
+                                    <td>{{ activity.timestamp|date:"Y-m-d H:i" }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
