@@ -1,87 +1,135 @@
-{% extends 'managers/base.html' %}
+{% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Fine Report{% endblock %}
 
-{% block manager_content %}
-<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-    <h1 class="h2">Fine Report</h1>
-</div>
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h1>Fine Report</h1>
+            <p class="lead">LibraryFusion</p>
+        </div>
+    </div>
 
-<div class="row">
-    <!-- Total Fines Card -->
-    <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card border-left-primary shadow h-100 py-2">
-            <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                            Total Fines</div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">${{ total_fines }}</div>
-                    </div>
-                    <div class="col-auto">
-                        <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+    <!-- Quick Actions -->
+    <div class="row mb-4">
+        <div class="col">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Quick Actions</h5>
+                    <div class="d-flex gap-2">
+                        <a href="{% url 'managers:dashboard' %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Back to Dashboard
+                        </a>
+                        <a href="{% url 'managers:fine_settings' %}" class="btn btn-primary">
+                            <i class="fas fa-cog"></i> Fine Settings
+                        </a>
+                        <a href="{% url 'managers:export_report' 'fines' %}" class="btn btn-success">
+                            <i class="fas fa-download"></i> Export Report
+                        </a>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Unpaid Fines Card -->
-    <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card border-left-danger shadow h-100 py-2">
-            <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
-                            Unpaid Fines</div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">${{ unpaid_fines }}</div>
+    <div class="row">
+        <!-- Total Fines Card -->
+        <div class="col-xl-4 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Total Fines</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">${{ total_fines|floatformat:2 }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                        </div>
                     </div>
-                    <div class="col-auto">
-                        <i class="fas fa-exclamation-circle fa-2x text-gray-300"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Unpaid Fines Card -->
+        <div class="col-xl-4 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Unpaid Fines</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">${{ unpaid_fines|floatformat:2 }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-exclamation-circle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Paid Fines Card -->
+        <div class="col-xl-4 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Paid Fines</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">${{ paid_fines|floatformat:2 }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-check-circle fa-2x text-gray-300"></i>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
-<!-- Users with Fines Section -->
-<div class="card shadow mb-4">
-    <div class="card-header py-3">
-        <h6 class="m-0 font-weight-bold text-primary">Users with Outstanding Fines</h6>
-    </div>
-    <div class="card-body">
-        <div class="table-responsive">
-            <table class="table table-bordered" width="100%" cellspacing="0">
-                <thead>
-                    <tr>
-                        <th>Username</th>
-                        <th>Name</th>
-                        <th>Email</th>
-                        <th>Fine Balance</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for user in users_with_fines %}
-                    <tr>
-                        <td>{{ user.username }}</td>
-                        <td>{{ user.get_full_name }}</td>
-                        <td>{{ user.email }}</td>
-                        <td>${{ user.fine_balance }}</td>
-                        <td>
-                            <a href="{% url 'managers:user_detail' user.pk %}" class="btn btn-sm btn-info">
-                                <i class="fas fa-eye"></i> View Details
-                            </a>
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="5" class="text-center">No users with outstanding fines</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+    <!-- Recent Fines Section -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Recent Fines</h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>User</th>
+                            <th>Book</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for fine in recent_fines %}
+                        <tr>
+                            <td>{{ fine.borrowing_record.borrower.get_full_name }}</td>
+                            <td>{{ fine.borrowing_record.book.title }}</td>
+                            <td>${{ fine.amount|floatformat:2 }}</td>
+                            <td>
+                                {% if fine.paid %}
+                                <span class="badge bg-success">Paid</span>
+                                {% else %}
+                                <span class="badge bg-warning">Unpaid</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ fine.created_at|date:"Y-m-d" }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center">No recent fines</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>
