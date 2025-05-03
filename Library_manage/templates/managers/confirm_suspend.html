@@ -1,55 +1,40 @@
-{% extends 'managers/base.html' %}
+{% extends 'base.html' %}
+{% load static %}
 
-{% block title %}{% if user.is_active %}Suspend{% else %}Activate{% endif %} User - {{ user.username }}{% endblock %}
+{% block title %}Confirm User {{ action|title }}{% endblock %}
 
-{% block manager_content %}
-<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-    <h1 class="h2">{% if user.is_active %}Suspend{% else %}Activate{% endif %} User</h1>
-    <div class="btn-toolbar mb-2 mb-md-0">
-        <a href="{% url 'managers:user_detail' user.pk %}" class="btn btn-sm btn-secondary">
-            <i class="fas fa-arrow-left"></i> Back to User Details
-        </a>
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h1>Confirm User {{ action|title }}</h1>
+            <p class="lead">LibraryFusion</p>
+        </div>
     </div>
-</div>
 
-<div class="row">
-    <div class="col-md-8 mx-auto">
-        <div class="card shadow">
-            <div class="card-header py-3">
-                <h6 class="m-0 font-weight-bold text-primary">Confirm Action</h6>
-            </div>
-            <div class="card-body">
-                <div class="alert {% if user.is_active %}alert-warning{% else %}alert-success{% endif %}">
-                    <h4 class="alert-heading">
-                        <i class="fas {% if user.is_active %}fa-exclamation-triangle{% else %}fa-check-circle{% endif %}"></i>
-                        {% if user.is_active %}Warning{% else %}Information{% endif %}
-                    </h4>
-                    <p>
-                        {% if user.is_active %}
-                        You are about to suspend the following user:
-                        {% else %}
-                        You are about to activate the following user:
-                        {% endif %}
+    <div class="row">
+        <div class="col-md-6 offset-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Are you sure?</h5>
+                    <p class="card-text">
+                        You are about to {{ action }} the following user:
                     </p>
-                    <hr>
-                    <p class="mb-0">
-                        <strong>Username:</strong> {{ user.username }}<br>
-                        <strong>Name:</strong> {{ user.get_full_name }}<br>
-                        <strong>Email:</strong> {{ user.email }}
-                    </p>
-                </div>
-
-                <div class="mt-4">
+                    <div class="alert {% if action == 'suspend' %}alert-warning{% else %}alert-success{% endif %}">
+                        <strong>{{ user.get_full_name }}</strong><br>
+                        Email: {{ user.email }}<br>
+                        Role: {{ user.get_role_display }}
+                    </div>
                     <form method="post">
                         {% csrf_token %}
-                        <div class="d-flex justify-content-between">
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn {% if action == 'suspend' %}btn-warning{% else %}btn-success{% endif %}">
+                                <i class="fas {% if action == 'suspend' %}fa-user-slash{% else %}fa-user-check{% endif %}"></i>
+                                Yes, {{ action|title }} User
+                            </button>
                             <a href="{% url 'managers:user_detail' user.pk %}" class="btn btn-secondary">
                                 <i class="fas fa-times"></i> Cancel
                             </a>
-                            <button type="submit" class="btn {% if user.is_active %}btn-warning{% else %}btn-success{% endif %}">
-                                <i class="fas {% if user.is_active %}fa-ban{% else %}fa-check{% endif %}"></i>
-                                {% if user.is_active %}Confirm Suspend{% else %}Confirm Activate{% endif %}
-                            </button>
                         </div>
                     </form>
                 </div>
