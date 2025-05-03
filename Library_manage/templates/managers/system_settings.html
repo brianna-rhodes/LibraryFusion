@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}System Settings{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h1>System Settings</h1>
+            <p class="lead">LibraryFusion</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">System Configuration</h5>
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                {{ form.review_system_enabled }}
+                                <label class="form-check-label" for="{{ form.review_system_enabled.id_for_label }}">
+                                    Enable Review System
+                                </label>
+                            </div>
+                            <small class="form-text text-muted">
+                                Allow users to write and read book reviews
+                            </small>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                {{ form.google_books_api_enabled }}
+                                <label class="form-check-label" for="{{ form.google_books_api_enabled.id_for_label }}">
+                                    Enable Google Books API
+                                </label>
+                            </div>
+                            <small class="form-text text-muted">
+                                Use Google Books API for book information and covers
+                            </small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.maintenance_scheduled.id_for_label }}" class="form-label">
+                                Maintenance Scheduled
+                            </label>
+                            {{ form.maintenance_scheduled }}
+                            <small class="form-text text-muted">
+                                Schedule system maintenance (optional)
+                            </small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.maintenance_message.id_for_label }}" class="form-label">
+                                Maintenance Message
+                            </label>
+                            {{ form.maintenance_message }}
+                            <small class="form-text text-muted">
+                                Message to display during maintenance
+                            </small>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Save Settings
+                            </button>
+                            <a href="{% url 'managers:dashboard' %}" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Quick Actions</h5>
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'managers:dashboard' %}" class="btn btn-outline-primary">
+                            <i class="fas fa-tachometer-alt"></i> Back to Dashboard
+                        </a>
+                        <a href="{% url 'managers:borrowing_settings' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-book"></i> Borrowing Settings
+                        </a>
+                        <a href="{% url 'managers:fine_settings' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-dollar-sign"></i> Fine Settings
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 
