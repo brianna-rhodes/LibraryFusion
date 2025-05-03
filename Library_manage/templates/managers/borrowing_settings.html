@@ -1,67 +1,136 @@
-{% extends 'managers/base.html' %}
-{% load crispy_forms_tags %}
+{% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Borrowing Settings{% endblock %}
 
-{% block manager_content %}
-<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-    <h1 class="h2">Borrowing Settings</h1>
-    <div class="btn-toolbar mb-2 mb-md-0">
-        <a href="{% url 'managers:settings' %}" class="btn btn-sm btn-secondary">
-            <i class="fas fa-arrow-left"></i> Back to Settings
-        </a>
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h1>Borrowing Settings</h1>
+            <p class="lead">LibraryFusion</p>
+        </div>
     </div>
-</div>
 
-<div class="row">
-    <div class="col-md-8 mx-auto">
-        <div class="card shadow">
-            <div class="card-header py-3">
-                <h6 class="m-0 font-weight-bold text-primary">Configure Borrowing Rules</h6>
-            </div>
-            <div class="card-body">
-                <form method="post">
-                    {% csrf_token %}
-                    {{ form|crispy }}
-                    <div class="mt-4">
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-save"></i> Save Settings
-                        </button>
-                        <a href="{% url 'managers:settings' %}" class="btn btn-secondary">
-                            <i class="fas fa-times"></i> Cancel
+    <!-- Quick Actions -->
+    <div class="row mb-4">
+        <div class="col">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Quick Actions</h5>
+                    <div class="d-flex gap-2">
+                        <a href="{% url 'managers:dashboard' %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Back to Dashboard
+                        </a>
+                        <a href="{% url 'managers:borrowing_report' %}" class="btn btn-primary">
+                            <i class="fas fa-chart-bar"></i> View Borrowing Report
                         </a>
                     </div>
-                </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Borrowing Configuration</h5>
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.borrowing_period.id_for_label }}" class="form-label">
+                                Borrowing Period
+                            </label>
+                            {{ form.borrowing_period }}
+                            <small class="form-text text-muted">
+                                Number of days a book can be borrowed
+                            </small>
+                            {% if form.borrowing_period.errors %}
+                            <div class="alert alert-danger">
+                                {{ form.borrowing_period.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.renewal_period.id_for_label }}" class="form-label">
+                                Renewal Period
+                            </label>
+                            {{ form.renewal_period }}
+                            <small class="form-text text-muted">
+                                Number of days added when renewing a book
+                            </small>
+                            {% if form.renewal_period.errors %}
+                            <div class="alert alert-danger">
+                                {{ form.renewal_period.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.max_renewals.id_for_label }}" class="form-label">
+                                Maximum Renewals
+                            </label>
+                            {{ form.max_renewals }}
+                            <small class="form-text text-muted">
+                                Maximum number of times a book can be renewed
+                            </small>
+                            {% if form.max_renewals.errors %}
+                            <div class="alert alert-danger">
+                                {{ form.max_renewals.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.reservation_period.id_for_label }}" class="form-label">
+                                Reservation Period
+                            </label>
+                            {{ form.reservation_period }}
+                            <small class="form-text text-muted">
+                                Number of days a book can be reserved
+                            </small>
+                            {% if form.reservation_period.errors %}
+                            <div class="alert alert-danger">
+                                {{ form.reservation_period.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Save Settings
+                            </button>
+                            <a href="{% url 'managers:dashboard' %}" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
 
-        <!-- Current Settings -->
-        <div class="card shadow mt-4">
-            <div class="card-header py-3">
-                <h6 class="m-0 font-weight-bold text-primary">Current Settings</h6>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="mb-3">
-                            <strong>Borrowing Period:</strong>
-                            <p class="text-muted">The number of days a user can keep a book</p>
-                        </div>
-                        <div class="mb-3">
-                            <strong>Renewal Period:</strong>
-                            <p class="text-muted">The number of days added when renewing a book</p>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="mb-3">
-                            <strong>Maximum Renewals:</strong>
-                            <p class="text-muted">The maximum number of times a book can be renewed</p>
-                        </div>
-                        <div class="mb-3">
-                            <strong>Reservation Period:</strong>
-                            <p class="text-muted">The number of days a reserved book is held for the user</p>
-                        </div>
-                    </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Borrowing Policy Information</h5>
+                    <p class="card-text">
+                        Configure how book borrowing works in the library system. These settings affect:
+                    </p>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-calendar-day text-primary"></i> Standard borrowing duration</li>
+                        <li><i class="fas fa-redo text-success"></i> Book renewal options</li>
+                        <li><i class="fas fa-bookmark text-warning"></i> Reservation handling</li>
+                        <li><i class="fas fa-clock text-info"></i> Time limits and restrictions</li>
+                    </ul>
+                    <hr>
+                    <p class="card-text">
+                        <small class="text-muted">
+                            Note: Changes to these settings will only affect new borrowings. Existing borrowings will not be modified.
+                        </small>
+                    </p>
                 </div>
             </div>
         </div>
