@@ -1,18 +1,19 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.db.models import Q
+from django.db.models import Q, Avg
 from django.core.paginator import Paginator
 from django.utils import timezone
 from datetime import timedelta
-from .models import Book, Category, BorrowingRecord, Order
-from .forms import BookSearchForm, BorrowBookForm, OrderForm
+from .models import Book, Category, BorrowingRecord, Order, Review
+from .forms import BookSearchForm, BorrowBookForm, OrderForm, ReviewForm, BookForm
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.views.generic import ListView, CreateView, UpdateView
 from django.urls import reverse_lazy
+from django.db.models import Count
 
 def book_list(request):
-    books = Book.objects.all()
+    books = Book.objects.all().order_by('title')  # Add ordering by title
     categories = Category.objects.all()
     search_form = BookSearchForm(request.GET)
     
@@ -44,7 +45,8 @@ def book_list(request):
 
 def book_detail(request, pk):
     book = get_object_or_404(Book, pk=pk)
-    reviews = book.reviews.all()
+    reviews = book.book_reviews.all()
+    average_rating = reviews.aggregate(Avg('rating'))['rating__avg'] or 0
     is_available = book.available_copies > 0
     can_borrow = request.user.is_authenticated and request.user.is_student and is_available
     
@@ -57,9 +59,23 @@ def book_detail(request, pk):
             status='BORROWED'
         ).exists()
     
+    if request.method == 'POST' and request.user.is_authenticated and request.user.role == 'STUDENT':
+        review_form = ReviewForm(request.POST)
+        if review_form.is_valid():
+            review = review_form.save(commit=False)
+            review.book = book
+            review.user = request.user
+            review.save()
+            messages.success(request, 'Your review has been submitted successfully!')
+            return redirect('books:detail', pk=book.pk)
+    else:
+        review_form = ReviewForm()
+    
     context = {
         'book': book,
         'reviews': reviews,
+        'average_rating': round(average_rating, 1),
+        'review_form': review_form,
         'is_available': is_available,
         'can_borrow': can_borrow,
         'has_borrowed': has_borrowed,
@@ -153,19 +169,24 @@ def return_book(request, pk):
     return redirect('books:my_books')
 
 def home(request):
-    """
-    Main page view that displays featured books, recent additions, and other highlights.
-    """
-    # Get books with lowest available copies as featured (most borrowed)
-    featured_books = Book.objects.order_by('available_copies')[:6]
+    """Main page for regular users and unauthenticated visitors"""
+    # Get featured books (most borrowed books)
+    featured_books = Book.objects.annotate(
+        borrow_count=Count('borrowing_records')
+    ).order_by('-borrow_count')[:6]
+    
+    # Get recent books
     recent_books = Book.objects.order_by('-created_at')[:6]
-    # Get books with lowest available copies as popular
-    popular_books = Book.objects.order_by('available_copies')[:6]
+    
+    # Get popular categories
+    popular_categories = Category.objects.annotate(
+        book_count=Count('books')
+    ).order_by('-book_count')[:5]
     
     context = {
         'featured_books': featured_books,
         'recent_books': recent_books,
-        'popular_books': popular_books,
+        'popular_categories': popular_categories,
     }
     return render(request, 'books/home.html', context)
 
@@ -225,3 +246,26 @@ def delete_book(request, pk):
     book.delete()
     messages.success(request, 'Book deleted successfully.')
     return redirect('books:list')
+
+@login_required
+def add_book(request):
+    if not request.user.role == 'LIBRARIAN':
+        messages.error(request, 'Only librarians can add books.')
+        return redirect('books:list')
+    
+    if request.method == 'POST':
+        form = BookForm(request.POST, request.FILES)
+        if form.is_valid():
+            book = form.save(commit=False)
+            book.available_copies = book.total_copies
+            book.save()
+            messages.success(request, 'Book added successfully!')
+            return redirect('books:detail', pk=book.pk)
+    else:
+        form = BookForm()
+    
+    context = {
+        'form': form,
+        'title': 'Add New Book'
+    }
+    return render(request, 'books/book_form.html', context)
