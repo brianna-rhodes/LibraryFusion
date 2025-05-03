@@ -1,121 +1,144 @@
-{% extends 'managers/base.html' %}
+{% extends 'base.html' %}
+{% load static %}
 
-{% block title %}User Details - {{ user.username }}{% endblock %}
+{% block title %}User Details{% endblock %}
 
-{% block manager_content %}
-<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-    <h1 class="h2">User Details</h1>
-    <div class="btn-toolbar mb-2 mb-md-0">
-        <a href="{% url 'managers:manage_users' %}" class="btn btn-sm btn-secondary">
-            <i class="fas fa-arrow-left"></i> Back to Users
-        </a>
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h1>User Details</h1>
+            <p class="lead">LibraryFusion</p>
+        </div>
     </div>
-</div>
 
-<div class="row">
-    <!-- User Information -->
-    <div class="col-md-4 mb-4">
-        <div class="card shadow">
-            <div class="card-header py-3">
-                <h6 class="m-0 font-weight-bold text-primary">User Information</h6>
+    <!-- Quick Actions -->
+    <div class="row mb-4">
+        <div class="col">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Quick Actions</h5>
+                    <div class="d-flex gap-2">
+                        <a href="{% url 'managers:manage_users' %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Back to Users
+                        </a>
+                        <a href="{% url 'managers:suspend_user' user.pk %}" class="btn {% if user.is_active %}btn-warning{% else %}btn-success{% endif %}">
+                            <i class="fas {% if user.is_active %}fa-user-slash{% else %}fa-user-check{% endif %}"></i>
+                            {% if user.is_active %}Suspend User{% else %}Activate User{% endif %}
+                        </a>
+                    </div>
+                </div>
             </div>
-            <div class="card-body">
-                <div class="mb-3">
-                    <strong>Username:</strong> {{ user.username }}
+        </div>
+    </div>
+
+    <!-- User Information -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Basic Information</h5>
+                    <table class="table">
+                        <tr>
+                            <th>Name:</th>
+                            <td>{{ user.get_full_name }}</td>
+                        </tr>
+                        <tr>
+                            <th>Email:</th>
+                            <td>{{ user.email }}</td>
+                        </tr>
+                        <tr>
+                            <th>Role:</th>
+                            <td>{{ user.get_role_display }}</td>
+                        </tr>
+                        <tr>
+                            <th>Status:</th>
+                            <td>
+                                {% if user.is_active %}
+                                    <span class="badge bg-success">Active</span>
+                                {% else %}
+                                    <span class="badge bg-danger">Suspended</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Phone:</th>
+                            <td>{{ user.phone_number|default:"-" }}</td>
+                        </tr>
+                        <tr>
+                            <th>Address:</th>
+                            <td>{{ user.address|default:"-" }}</td>
+                        </tr>
+                    </table>
                 </div>
-                <div class="mb-3">
-                    <strong>Name:</strong> {{ user.get_full_name }}
-                </div>
-                <div class="mb-3">
-                    <strong>Email:</strong> {{ user.email }}
-                </div>
-                <div class="mb-3">
-                    <strong>Role:</strong>
-                    {% if user.is_manager %}
-                    <span class="badge badge-primary">Manager</span>
-                    {% elif user.is_librarian %}
-                    <span class="badge badge-info">Librarian</span>
-                    {% else %}
-                    <span class="badge badge-secondary">Member</span>
-                    {% endif %}
-                </div>
-                <div class="mb-3">
-                    <strong>Status:</strong>
-                    {% if user.is_active %}
-                    <span class="badge badge-success">Active</span>
-                    {% else %}
-                    <span class="badge badge-danger">Suspended</span>
-                    {% endif %}
-                </div>
-                <div class="mb-3">
-                    <strong>Date Joined:</strong> {{ user.date_joined|date:"M d, Y" }}
-                </div>
-                <div class="mb-3">
-                    <strong>Last Login:</strong> {{ user.last_login|date:"M d, Y H:i" }}
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Account Information</h5>
+                    <table class="table">
+                        <tr>
+                            <th>Fine Balance:</th>
+                            <td>${{ user.fine_balance }}</td>
+                        </tr>
+                        <tr>
+                            <th>Date Joined:</th>
+                            <td>{{ user.date_joined|date:"Y-m-d" }}</td>
+                        </tr>
+                        <tr>
+                            <th>Last Login:</th>
+                            <td>{{ user.last_login|date:"Y-m-d H:i"|default:"Never" }}</td>
+                        </tr>
+                    </table>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Borrowing History -->
-    <div class="col-md-8 mb-4">
-        <div class="card shadow">
-            <div class="card-header py-3">
-                <h6 class="m-0 font-weight-bold text-primary">Borrowing History</h6>
-            </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-bordered" width="100%" cellspacing="0">
-                        <thead>
-                            <tr>
-                                <th>Book</th>
-                                <th>Borrowed Date</th>
-                                <th>Due Date</th>
-                                <th>Return Date</th>
-                                <th>Status</th>
-                                <th>Fine</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for record in borrowing_history %}
-                            <tr>
-                                <td>{{ record.book.title }}</td>
-                                <td>{{ record.borrowed_date|date:"M d, Y" }}</td>
-                                <td>{{ record.due_date|date:"M d, Y" }}</td>
-                                <td>{{ record.return_date|date:"M d, Y"|default:"-" }}</td>
-                                <td>
-                                    {% if record.status == 'BORROWED' %}
-                                    <span class="badge badge-primary">Borrowed</span>
-                                    {% elif record.status == 'RETURNED' %}
-                                    <span class="badge badge-success">Returned</span>
-                                    {% else %}
-                                    <span class="badge badge-danger">Overdue</span>
-                                    {% endif %}
-                                </td>
-                                <td>${{ record.fine_amount }}</td>
-                            </tr>
-                            {% empty %}
-                            <tr>
-                                <td colspan="6" class="text-center">No borrowing history found</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+    <div class="row">
+        <div class="col">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Borrowing History</h5>
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Book</th>
+                                    <th>Borrowed Date</th>
+                                    <th>Due Date</th>
+                                    <th>Return Date</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for record in borrowing_history %}
+                                <tr>
+                                    <td>{{ record.book.title }}</td>
+                                    <td>{{ record.borrowed_date|date:"Y-m-d" }}</td>
+                                    <td>{{ record.due_date|date:"Y-m-d" }}</td>
+                                    <td>{{ record.return_date|date:"Y-m-d"|default:"-" }}</td>
+                                    <td>
+                                        {% if record.status == 'BORROWED' %}
+                                            <span class="badge bg-primary">Borrowed</span>
+                                        {% elif record.status == 'RETURNED' %}
+                                            <span class="badge bg-success">Returned</span>
+                                        {% elif record.status == 'OVERDUE' %}
+                                            <span class="badge bg-danger">Overdue</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center">No borrowing history found.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Action Buttons -->
-<div class="row">
-    <div class="col-12">
-        <div class="card shadow mb-4">
-            <div class="card-body">
-                <a href="{% url 'managers:suspend_user' user.pk %}" class="btn {% if user.is_active %}btn-warning{% else %}btn-success{% endif %}">
-                    <i class="fas {% if user.is_active %}fa-ban{% else %}fa-check{% endif %}"></i>
-                    {% if user.is_active %}Suspend User{% else %}Activate User{% endif %}
-                </a>
             </div>
         </div>
     </div>
