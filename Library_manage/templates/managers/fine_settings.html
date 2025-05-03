@@ -1,67 +1,136 @@
-{% extends 'managers/base.html' %}
-{% load crispy_forms_tags %}
+{% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Fine Settings{% endblock %}
 
-{% block manager_content %}
-<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-    <h1 class="h2">Fine Settings</h1>
-    <div class="btn-toolbar mb-2 mb-md-0">
-        <a href="{% url 'managers:settings' %}" class="btn btn-sm btn-secondary">
-            <i class="fas fa-arrow-left"></i> Back to Settings
-        </a>
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h1>Fine Settings</h1>
+            <p class="lead">LibraryFusion</p>
+        </div>
     </div>
-</div>
 
-<div class="row">
-    <div class="col-md-8 mx-auto">
-        <div class="card shadow">
-            <div class="card-header py-3">
-                <h6 class="m-0 font-weight-bold text-primary">Configure Fine Rules</h6>
-            </div>
-            <div class="card-body">
-                <form method="post">
-                    {% csrf_token %}
-                    {{ form|crispy }}
-                    <div class="mt-4">
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-save"></i> Save Settings
-                        </button>
-                        <a href="{% url 'managers:settings' %}" class="btn btn-secondary">
-                            <i class="fas fa-times"></i> Cancel
+    <!-- Quick Actions -->
+    <div class="row mb-4">
+        <div class="col">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Quick Actions</h5>
+                    <div class="d-flex gap-2">
+                        <a href="{% url 'managers:dashboard' %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Back to Dashboard
+                        </a>
+                        <a href="{% url 'managers:fine_report' %}" class="btn btn-primary">
+                            <i class="fas fa-chart-bar"></i> View Fine Report
                         </a>
                     </div>
-                </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Fine Configuration</h5>
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.daily_fine.id_for_label }}" class="form-label">
+                                Daily Fine Amount
+                            </label>
+                            {{ form.daily_fine }}
+                            <small class="form-text text-muted">
+                                Amount charged per day for overdue books
+                            </small>
+                            {% if form.daily_fine.errors %}
+                            <div class="alert alert-danger">
+                                {{ form.daily_fine.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.max_fine.id_for_label }}" class="form-label">
+                                Maximum Fine Amount
+                            </label>
+                            {{ form.max_fine }}
+                            <small class="form-text text-muted">
+                                Maximum amount that can be charged for a single overdue book
+                            </small>
+                            {% if form.max_fine.errors %}
+                            <div class="alert alert-danger">
+                                {{ form.max_fine.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.grace_period.id_for_label }}" class="form-label">
+                                Grace Period
+                            </label>
+                            {{ form.grace_period }}
+                            <small class="form-text text-muted">
+                                Number of days after due date before fines start accumulating
+                            </small>
+                            {% if form.grace_period.errors %}
+                            <div class="alert alert-danger">
+                                {{ form.grace_period.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.lost_book_fine.id_for_label }}" class="form-label">
+                                Lost Book Fine
+                            </label>
+                            {{ form.lost_book_fine }}
+                            <small class="form-text text-muted">
+                                Fixed amount charged for lost books
+                            </small>
+                            {% if form.lost_book_fine.errors %}
+                            <div class="alert alert-danger">
+                                {{ form.lost_book_fine.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Save Settings
+                            </button>
+                            <a href="{% url 'managers:dashboard' %}" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
 
-        <!-- Current Settings -->
-        <div class="card shadow mt-4">
-            <div class="card-header py-3">
-                <h6 class="m-0 font-weight-bold text-primary">Current Settings</h6>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="mb-3">
-                            <strong>Daily Fine Rate:</strong>
-                            <p class="text-muted">The amount charged per day for overdue books</p>
-                        </div>
-                        <div class="mb-3">
-                            <strong>Grace Period:</strong>
-                            <p class="text-muted">Number of days before fines start accumulating</p>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="mb-3">
-                            <strong>Maximum Fine:</strong>
-                            <p class="text-muted">The maximum fine amount that can be charged per book</p>
-                        </div>
-                        <div class="mb-3">
-                            <strong>Fine Payment Due Days:</strong>
-                            <p class="text-muted">Number of days given to pay fines before additional penalties</p>
-                        </div>
-                    </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Fine Policy Information</h5>
+                    <p class="card-text">
+                        Configure how fines are calculated and applied in the library system. These settings affect:
+                    </p>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-clock text-warning"></i> Overdue book charges</li>
+                        <li><i class="fas fa-exclamation-triangle text-danger"></i> Lost book penalties</li>
+                        <li><i class="fas fa-calendar-alt text-info"></i> Grace period allowances</li>
+                        <li><i class="fas fa-hand-holding-usd text-success"></i> Maximum fine limits</li>
+                    </ul>
+                    <hr>
+                    <p class="card-text">
+                        <small class="text-muted">
+                            Note: Changes to these settings will only affect new fines. Existing fines will not be modified.
+                        </small>
+                    </p>
                 </div>
             </div>
         </div>
