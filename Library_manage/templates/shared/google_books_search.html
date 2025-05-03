@@ -1,95 +1,93 @@
-<!-- Google Books Search Component -->
+{% load static %}
 <div class="card shadow mb-4">
     <div class="card-header py-3">
-        <h6 class="m-0 font-weight-bold text-primary">
-            <i class="fas fa-book"></i> Quick Book Import
-        </h6>
+        <h6 class="m-0 font-weight-bold text-primary">Quick Book Import</h6>
     </div>
     <div class="card-body">
-        <div class="input-group mb-3">
-            <input type="text" id="googleBooksSearch" class="form-control" placeholder="Search by title, author, or ISBN...">
-            <button class="btn btn-primary" type="button" id="searchGoogleBooks">
-                <i class="fas fa-search"></i> Search
-            </button>
-        </div>
-        <div id="googleBooksResults" class="mt-3" style="display: none;">
-            <h6 class="mb-3">Search Results</h6>
-            <div id="searchResults" class="list-group">
-                <!-- Results will be populated here -->
+        <form id="googleBooksSearchForm" class="mb-3">
+            <div class="input-group">
+                <input type="text" class="form-control" id="bookSearch" placeholder="Search for books...">
+                <button class="btn btn-primary" type="submit">
+                    <i class="fas fa-search"></i> Search
+                </button>
+            </div>
+        </form>
+        <div id="searchResults" class="d-none">
+            <div class="table-responsive">
+                <table class="table table-bordered" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Author</th>
+                            <th>ISBN</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="searchResultsBody">
+                        <!-- Results will be populated here -->
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
 </div>
 
+{% block extra_js %}
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const searchButton = document.getElementById('searchGoogleBooks');
-    const searchInput = document.getElementById('googleBooksSearch');
-    const resultsDiv = document.getElementById('googleBooksResults');
-    const searchResults = document.getElementById('searchResults');
-
-    searchButton.addEventListener('click', function() {
-        const query = searchInput.value.trim();
-        if (query) {
-            // Show loading state
-            searchResults.innerHTML = '<div class="alert alert-info">Searching...</div>';
-            resultsDiv.style.display = 'block';
-
-            fetch(`/librarians/books/search/?q=${encodeURIComponent(query)}`, {
-                headers: {
-                    'Accept': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            })
-            .then(response => {
-                if (!response.ok) {
-                    return response.text().then(text => {
-                        try {
-                            const data = JSON.parse(text);
-                            throw new Error(data.message || 'Error searching for books');
-                        } catch (e) {
-                            throw new Error('Server error occurred. Please try again later.');
-                        }
-                    });
-                }
-                return response.json();
-            })
-            .then(data => {
-                searchResults.innerHTML = '';
-                if (data.books && data.books.length > 0) {
-                    data.books.forEach(book => {
-                        const bookElement = document.createElement('div');
-                        bookElement.className = 'list-group-item';
-                        bookElement.innerHTML = `
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <h6 class="mb-1">${book.title}</h6>
-                                    <small class="text-muted">${book.authors.join(', ')}</small>
-                                    <br>
-                                    <small class="text-muted">ISBN: ${book.isbn || 'N/A'}</small>
-                                </div>
-                                <div class="btn-group">
-                                    <a href="{% url 'librarians:add_book' %}?google_id=${book.google_books_id}" 
-                                       class="btn btn-sm btn-primary">
-                                        <i class="fas fa-plus"></i> Add
-                                    </a>
-                                </div>
-                            </div>
-                        `;
-                        searchResults.appendChild(bookElement);
-                    });
-                    resultsDiv.style.display = 'block';
-                } else {
-                    searchResults.innerHTML = '<div class="alert alert-info">No books found.</div>';
-                    resultsDiv.style.display = 'block';
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                searchResults.innerHTML = `<div class="alert alert-danger">${error.message}</div>`;
-                resultsDiv.style.display = 'block';
-            });
-        }
+    document.getElementById('googleBooksSearchForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const searchQuery = document.getElementById('bookSearch').value;
+        
+        fetch(`/books/search/?q=${encodeURIComponent(searchQuery)}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            const resultsBody = document.getElementById('searchResultsBody');
+            resultsBody.innerHTML = '';
+            
+            if (data.books && data.books.length > 0) {
+                data.books.forEach(book => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${book.title}</td>
+                        <td>${book.authors.join(', ')}</td>
+                        <td>${book.isbn || 'N/A'}</td>
+                        <td>
+                            <button class="btn btn-sm btn-primary import-book" 
+                                    data-book='${JSON.stringify(book)}'>
+                                Import
+                            </button>
+                        </td>
+                    `;
+                    resultsBody.appendChild(row);
+                });
+                document.getElementById('searchResults').classList.remove('d-none');
+            } else {
+                resultsBody.innerHTML = '<tr><td colspan="4" class="text-center">No results found</td></tr>';
+                document.getElementById('searchResults').classList.remove('d-none');
+            }
+        });
     });
-});
-</script> 
+
+    // Helper function to get CSRF token
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+</script>
+{% endblock %} 
