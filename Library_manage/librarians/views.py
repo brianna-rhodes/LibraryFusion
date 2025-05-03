@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.db.models import Count, Q, Sum
 from django.utils import timezone
 from django.http import JsonResponse
-from datetime import timedelta
+from datetime import timedelta, datetime
 from books.models import Book, Category, BorrowingRecord
 from books.services import GoogleBooksService
 from account.models import User
@@ -14,7 +14,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 def is_librarian(user):
-    return user.is_authenticated and user.is_librarian
+    return user.is_authenticated and user.role == 'LIBRARIAN'
 
 @login_required
 @user_passes_test(is_librarian)
@@ -348,3 +348,54 @@ def user_detail(request, pk):
         'fine_history': fine_history,
     }
     return render(request, 'librarians/user_detail.html', context)
+
+@login_required
+@user_passes_test(is_librarian)
+def profile(request):
+    return render(request, 'librarians/profile.html')
+
+@login_required
+def borrowing_report(request):
+    if not request.user.role == 'LIBRARIAN':
+        return redirect('books:list')
+    
+    # Get date range from request or use default (last 30 days)
+    end_date = datetime.now()
+    start_date = end_date - timedelta(days=30)
+    
+    # Get borrowing statistics
+    total_borrowings = BorrowingRecord.objects.filter(
+        borrowed_date__range=[start_date, end_date]
+    ).count()
+    
+    active_borrowings = BorrowingRecord.objects.filter(
+        status='BORROWED'
+    ).count()
+    
+    overdue_borrowings = BorrowingRecord.objects.filter(
+        status='OVERDUE'
+    ).count()
+    
+    returned_books = BorrowingRecord.objects.filter(
+        status='RETURNED',
+        return_date__range=[start_date, end_date]
+    ).count()
+    
+    # Get popular books
+    popular_books = BorrowingRecord.objects.filter(
+        borrowed_date__range=[start_date, end_date]
+    ).values('book__title').annotate(
+        borrow_count=Count('id')
+    ).order_by('-borrow_count')[:5]
+    
+    context = {
+        'total_borrowings': total_borrowings,
+        'active_borrowings': active_borrowings,
+        'overdue_borrowings': overdue_borrowings,
+        'returned_books': returned_books,
+        'popular_books': popular_books,
+        'start_date': start_date.date(),
+        'end_date': end_date.date(),
+    }
+    
+    return render(request, 'librarians/borrowing_report.html', context)
