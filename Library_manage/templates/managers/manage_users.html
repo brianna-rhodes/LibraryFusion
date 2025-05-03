@@ -1,70 +1,87 @@
-{% extends 'managers/base.html' %}
+{% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Manage Users{% endblock %}
 
-{% block manager_content %}
-<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-    <h1 class="h2">Manage Users</h1>
-</div>
-
-<div class="card shadow mb-4">
-    <div class="card-header py-3">
-        <h6 class="m-0 font-weight-bold text-primary">User List</h6>
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h1>Manage Users</h1>
+            <p class="lead">LibraryFusion</p>
+        </div>
     </div>
-    <div class="card-body">
-        <div class="table-responsive">
-            <table class="table table-bordered" width="100%" cellspacing="0">
-                <thead>
-                    <tr>
-                        <th>Username</th>
-                        <th>Name</th>
-                        <th>Email</th>
-                        <th>Role</th>
-                        <th>Status</th>
-                        <th>Borrowed Books</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for user in users %}
-                    <tr>
-                        <td>{{ user.username }}</td>
-                        <td>{{ user.get_full_name }}</td>
-                        <td>{{ user.email }}</td>
-                        <td>
-                            {% if user.is_manager %}
-                            <span class="badge badge-primary">Manager</span>
-                            {% elif user.is_librarian %}
-                            <span class="badge badge-info">Librarian</span>
-                            {% else %}
-                            <span class="badge badge-secondary">Member</span>
-                            {% endif %}
-                        </td>
-                        <td>
-                            {% if user.is_active %}
-                            <span class="badge badge-success">Active</span>
-                            {% else %}
-                            <span class="badge badge-danger">Suspended</span>
-                            {% endif %}
-                        </td>
-                        <td>{{ user.borrowed_count }}</td>
-                        <td>
-                            <a href="{% url 'managers:user_detail' user.pk %}" class="btn btn-sm btn-info">
-                                <i class="fas fa-eye"></i> View
-                            </a>
-                            <a href="{% url 'managers:suspend_user' user.pk %}" class="btn btn-sm {% if user.is_active %}btn-warning{% else %}btn-success{% endif %}">
-                                <i class="fas {% if user.is_active %}fa-ban{% else %}fa-check{% endif %}"></i>
-                                {% if user.is_active %}Suspend{% else %}Activate{% endif %}
-                            </a>
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="7" class="text-center">No users found</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+
+    <!-- Quick Actions -->
+    <div class="row mb-4">
+        <div class="col">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Quick Actions</h5>
+                    <div class="d-flex gap-2">
+                        <a href="{% url 'managers:dashboard' %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Back to Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Users List -->
+    <div class="row">
+        <div class="col">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Users</h5>
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Role</th>
+                                    <th>Borrowed Books</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for user in users %}
+                                <tr>
+                                    <td>{{ user.get_full_name }}</td>
+                                    <td>{{ user.email }}</td>
+                                    <td>{{ user.get_role_display }}</td>
+                                    <td>{{ user.borrowed_count }}</td>
+                                    <td>
+                                        {% if user.is_active %}
+                                            <span class="badge bg-success">Active</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">Suspended</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <a href="{% url 'managers:user_detail' user.pk %}" class="btn btn-sm btn-primary">
+                                                <i class="fas fa-eye"></i> View
+                                            </a>
+                                            <a href="{% url 'managers:suspend_user' user.pk %}" class="btn btn-sm {% if user.is_active %}btn-warning{% else %}btn-success{% endif %}">
+                                                <i class="fas {% if user.is_active %}fa-user-slash{% else %}fa-user-check{% endif %}"></i>
+                                                {% if user.is_active %}Suspend{% else %}Activate{% endif %}
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="6" class="text-center">No users found.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
