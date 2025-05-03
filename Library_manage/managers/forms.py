@@ -2,6 +2,7 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from account.models import User
 from django.core.validators import MinValueValidator
+from .models import SystemSettings
 
 class LibrarianForm(UserCreationForm):
     class Meta:
@@ -13,15 +14,14 @@ class LibrarianForm(UserCreationForm):
             'last_name': forms.TextInput(attrs={'required': True}),
         }
 
-class SystemSettingsForm(forms.Form):
-    library_name = forms.CharField(max_length=100)
-    library_address = forms.CharField(widget=forms.Textarea(attrs={'rows': 3}))
-    library_phone = forms.CharField(max_length=20)
-    library_email = forms.EmailField()
-    max_books_per_user = forms.IntegerField(
-        validators=[MinValueValidator(1)],
-        widget=forms.NumberInput(attrs={'min': 1})
-    )
+class SystemSettingsForm(forms.ModelForm):
+    class Meta:
+        model = SystemSettings
+        fields = ['review_system_enabled', 'google_books_api_enabled', 'maintenance_scheduled', 'maintenance_message']
+        widgets = {
+            'maintenance_message': forms.Textarea(attrs={'rows': 3}),
+            'maintenance_scheduled': forms.DateTimeInput(attrs={'type': 'datetime-local'}),
+        }
 
 class BorrowingSettingsForm(forms.Form):
     borrowing_period = forms.IntegerField(
