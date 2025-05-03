@@ -146,7 +146,7 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 # Login/Logout URLs
 LOGIN_URL = 'account:login'
-LOGIN_REDIRECT_URL = 'books:home'
+LOGIN_REDIRECT_URL = 'books:home'  # Default redirect for regular users
 LOGOUT_REDIRECT_URL = 'account:login'
 
 # Email configuration (for password reset)
