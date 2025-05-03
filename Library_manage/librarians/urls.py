@@ -21,4 +21,6 @@ urlpatterns = [
     path('fines/<int:pk>/update/', views.update_fine, name='update_fine'),
     path('users/', views.manage_users, name='manage_users'),
     path('users/<int:pk>/', views.user_detail, name='user_detail'),
+    path('profile/', views.profile, name='profile'),
+    path('borrowing-report/', views.borrowing_report, name='borrowing_report'),
 ] 
