@@ -5,8 +5,10 @@ from django.db.models import Q, Avg
 from django.core.paginator import Paginator
 from django.utils import timezone
 from datetime import timedelta
-from .models import Book, Category, BorrowingRecord, Order, Review
-from .forms import BookSearchForm, BorrowBookForm, OrderForm, ReviewForm, BookForm
+from .models import Book, Category, BorrowingRecord, Order
+from reviews.models import Review
+from .forms import BookSearchForm, BorrowBookForm, OrderForm, BookForm
+from reviews.forms import ReviewForm
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.views.generic import ListView, CreateView, UpdateView
 from django.urls import reverse_lazy
