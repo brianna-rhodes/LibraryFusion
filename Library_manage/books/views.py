@@ -58,7 +58,7 @@ def book_list(request):
 
 def book_detail(request, pk):
     book = get_object_or_404(Book, pk=pk)
-    reviews = book.book_reviews.all()
+    reviews = book.reviews.all()
     average_rating = reviews.aggregate(Avg('rating'))['rating__avg'] or 0
     is_available = book.available_copies > 0
     can_borrow = request.user.is_authenticated and request.user.is_student and is_available
