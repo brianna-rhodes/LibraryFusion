@@ -298,8 +298,8 @@ def add_book(request):
 
 @login_required
 def import_google_book(request, google_books_id):
-    if not request.user.is_manager:
-        messages.error(request, 'Only managers can import books.')
+    if not request.user.role in ['MANAGER', 'LIBRARIAN']:
+        messages.error(request, 'Only managers and librarians can import books.')
         return redirect('books:list')
     
     try:

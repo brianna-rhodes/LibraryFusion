@@ -46,9 +46,11 @@
                         <span class="badge bg-info">
                             Google Books
                         </span>
-                        <a href="{% url 'books:import_google_book' book.google_books_id %}" class="btn btn-outline-primary btn-sm">
-                            Import to Library
-                        </a>
+                        {% if user.is_authenticated and user.role == 'MANAGER' or user.role == 'LIBRARIAN' %}
+                            <a href="{% url 'books:import_google_book' book.google_books_id %}" class="btn btn-outline-primary btn-sm">
+                                Import to Library
+                            </a>
+                        {% endif %}
                     </div>
                 </div>
             </div>
