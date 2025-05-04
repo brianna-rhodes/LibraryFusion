@@ -57,6 +57,39 @@ python manage.py createsuperuser
 python manage.py runserver
 ```
 
+7. Change directory:
+```bash
+cd LibraryFusion/Library_manage
+```
+
+8. Create new file:
+```bash
+touch .env
+```
+
+9. Add to .env:
+```bash
+# Google Books API Configuration
+GOOGLE_BOOKS_API_KEY=AIzaSyDts-NIrfZufWN_96OGGUZPy_tdAZ-x588
+
+# Django Secret Key (for production)
+# SECRET_KEY=your_secret_key_here
+
+# Database Configuration (if needed)
+# DATABASE_URL=your_database_url_here
+
+# Email Configuration (if needed)
+# EMAIL_HOST=your_email_host
+# EMAIL_PORT=your_email_port
+# EMAIL_HOST_USER=your_email_user
+# EMAIL_HOST_PASSWORD=your_email_password
+```
+
+10. Run the development server:
+```bash
+python manage.py runserver
+```
+
 ## Project Structure
 
 ```
