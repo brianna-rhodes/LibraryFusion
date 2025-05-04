@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<style>
+    .form-control:focus {
+        border-color: #80bdff;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
+    .card {
+        border: none;
+        border-radius: 10px;
+    }
+    .card-header {
+        background-color: #f8f9fa;
+        border-bottom: 1px solid #e3e6f0;
+    }
+    .btn-primary {
+        background-color: #4e73df;
+        border-color: #4e73df;
+    }
+    .btn-primary:hover {
+        background-color: #2e59d9;
+        border-color: #2653d4;
+    }
+    .btn-secondary {
+        background-color: #858796;
+        border-color: #858796;
+    }
+    .btn-secondary:hover {
+        background-color: #717384;
+        border-color: #6b6d7d;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+{% endblock %} 
