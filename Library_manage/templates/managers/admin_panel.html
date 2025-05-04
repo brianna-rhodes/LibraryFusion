@@ -1,0 +1,183 @@
+{% extends 'managers/base.html' %}
+
+{% block title %}Admin Control Panel{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <h1 class="h3 mb-4 text-gray-800">Admin Control Panel</h1>
+
+    <!-- System Settings Card -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">System Settings</h6>
+        </div>
+        <div class="card-body">
+            <form id="systemSettingsForm">
+                <div class="form-group">
+                    <div class="custom-control custom-switch">
+                        <input type="checkbox" class="custom-control-input" id="reviewSystem" 
+                               {% if system_settings.review_system_enabled %}checked{% endif %}>
+                        <label class="custom-control-label" for="reviewSystem">Review System</label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="custom-control custom-switch">
+                        <input type="checkbox" class="custom-control-input" id="googleBooksApi" 
+                               {% if system_settings.google_books_api_enabled %}checked{% endif %}>
+                        <label class="custom-control-label" for="googleBooksApi">Google Books API</label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="maintenanceMessage">Maintenance Message</label>
+                    <textarea class="form-control" id="maintenanceMessage" rows="3">{{ system_settings.maintenance_message }}</textarea>
+                </div>
+                <div class="form-group">
+                    <label for="maintenanceDate">Maintenance Scheduled Date</label>
+                    <input type="datetime-local" class="form-control" id="maintenanceDate" 
+                           value="{{ system_settings.maintenance_scheduled|date:'Y-m-d\TH:i' }}">
+                </div>
+                <button type="submit" class="btn btn-primary">Save Settings</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- User Roles Card -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">User Roles</h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="userRolesTable">
+                    <thead>
+                        <tr>
+                            <th>Username</th>
+                            <th>Current Role</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for role in user_roles %}
+                        <tr>
+                            <td>{{ role.user.username }}</td>
+                            <td>{{ role.role }}</td>
+                            <td>
+                                <button class="btn btn-sm btn-primary edit-role" data-user-id="{{ role.user.id }}">
+                                    Edit Role
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Role Edit Modal -->
+<div class="modal fade" id="roleEditModal" tabindex="-1" role="dialog" aria-labelledby="roleEditModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="roleEditModalLabel">Edit User Role</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="roleEditForm">
+                    <input type="hidden" id="userId" name="user_id">
+                    <div class="form-group">
+                        <label for="role">Role</label>
+                        <select class="form-control" id="role" name="role">
+                            <option value="STUDENT">Student</option>
+                            <option value="LIBRARIAN">Librarian</option>
+                            <option value="MANAGER">Manager</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Permissions</label>
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="canBorrow" name="permissions" value="can_borrow">
+                            <label class="custom-control-label" for="canBorrow">Can Borrow Books</label>
+                        </div>
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="canReview" name="permissions" value="can_review">
+                            <label class="custom-control-label" for="canReview">Can Write Reviews</label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="saveRole">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // System Settings Form
+    $('#systemSettingsForm').on('submit', function(e) {
+        e.preventDefault();
+        const data = {
+            review_system: $('#reviewSystem').is(':checked'),
+            google_books_api: $('#googleBooksApi').is(':checked'),
+            maintenance_message: $('#maintenanceMessage').val(),
+            maintenance_date: $('#maintenanceDate').val()
+        };
+        
+        $.ajax({
+            url: '{% url "managers:update_settings" %}',
+            type: 'POST',
+            data: JSON.stringify(data),
+            contentType: 'application/json',
+            success: function(response) {
+                if (response.status === 'success') {
+                    alert('Settings updated successfully!');
+                }
+            },
+            error: function(xhr) {
+                alert('Error updating settings: ' + xhr.responseJSON.message);
+            }
+        });
+    });
+
+    // Role Edit Modal
+    $('.edit-role').click(function() {
+        const userId = $(this).data('user-id');
+        $('#userId').val(userId);
+        $('#roleEditModal').modal('show');
+    });
+
+    $('#saveRole').click(function() {
+        const formData = {
+            user_id: $('#userId').val(),
+            role: $('#role').val(),
+            permissions: $('input[name="permissions"]:checked').map(function() {
+                return $(this).val();
+            }).get()
+        };
+
+        $.ajax({
+            url: '{% url "managers:update_role" %}',
+            type: 'POST',
+            data: formData,
+            success: function(response) {
+                if (response.status === 'success') {
+                    $('#roleEditModal').modal('hide');
+                    location.reload();
+                }
+            },
+            error: function(xhr) {
+                alert('Error updating role: ' + xhr.responseJSON.message);
+            }
+        });
+    });
+});
+</script>
+{% endblock %} 
