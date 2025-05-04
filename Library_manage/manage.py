@@ -1,8 +1,11 @@
-#!/usr/bin/env python
 """Django's command-line utility for administrative tasks."""
 import os
+from dotenv import load_dotenv
 import sys
 
+load_dotenv() #Loads variables from .env file
+
+api_key = os.getenv("GOOGLE_BOOKS_API_KEY")
 
 def main():
     """Run administrative tasks."""
