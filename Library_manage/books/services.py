@@ -24,13 +24,24 @@ class GoogleBooksService:
     def search_books(self, query: str, max_results: int = 10) -> List[Dict]:
         """
         Search for books using the Google Books API
+        Args:
+            query: Search query string (can include subject: prefix for category searches)
+            max_results: Maximum number of results to return
         """
         try:
             logger.info(f"Searching Google Books for query: {query}")
+            
+            # If the query already includes subject: prefix, use it as is
+            if 'subject:' in query:
+                search_query = query
+            else:
+                search_query = query
+            
             result = self.service.volumes().list(
-                q=query,
+                q=search_query,
                 maxResults=max_results,
-                printType='BOOKS'
+                printType='BOOKS',
+                orderBy='relevance'  # Sort by relevance
             ).execute()
             
             books = []
@@ -103,4 +114,22 @@ class GoogleBooksService:
             return image_links['thumbnail'].replace('http://', 'https://')
         elif image_links.get('smallThumbnail'):
             return image_links['smallThumbnail'].replace('http://', 'https://')
-        return '' 
+        return ''
+    
+    def get_categories(self) -> List[str]:
+        """
+        Get a list of common book categories from Google Books
+        """
+        try:
+            # Common categories in Google Books
+            common_categories = [
+                "Fiction", "Nonfiction", "Science", "History", "Biography",
+                "Technology", "Art", "Business", "Computers", "Cooking",
+                "Education", "Health & Fitness", "Humor", "Law", "Mathematics",
+                "Medical", "Philosophy", "Psychology", "Religion", "Science Fiction",
+                "Self-Help", "Sports", "Travel"
+            ]
+            return sorted(common_categories)
+        except Exception as e:
+            logger.error(f"Error getting categories: {str(e)}")
+            return [] 

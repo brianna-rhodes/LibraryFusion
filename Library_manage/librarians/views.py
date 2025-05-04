@@ -243,12 +243,14 @@ def search_google_books(request):
         }, status=403)
 
     query = request.GET.get('q', '')
+    category = request.GET.get('category', '')
+    
     if not query:
         return JsonResponse({'books': []})
     
     try:
         google_books = GoogleBooksService()
-        books = google_books.search_books(query)
+        books = google_books.search_books(query=query, category=category)
         return JsonResponse({'books': books})
     except ValueError as e:
         logger.error(f"Configuration error in search_google_books: {str(e)}")

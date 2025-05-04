@@ -25,23 +25,36 @@ def book_list(request):
         query = search_form.cleaned_data.get('query')
         category = search_form.cleaned_data.get('category')
         
+        # Search local database
         if query:
-            # Search local database
             books = books.filter(
                 Q(title__icontains=query) |
                 Q(author__icontains=query) |
                 Q(isbn__icontains=query)
             )
+        
+        if category:
+            books = books.filter(category=category)
             
             # Search Google Books API
             try:
                 google_books_service = GoogleBooksService()
-                google_books_results = google_books_service.search_books(query)
+                # Get category name and convert to Google Books subject format
+                category_name = category.name.lower().replace(' ', '_')
+                # If there's a query, combine it with category, otherwise just search by category
+                search_query = f"subject:{category_name}" if not query else f"{query} subject:{category_name}"
+                google_books_results = google_books_service.search_books(
+                    query=search_query,
+                    max_results=20  # Increase results for category searches
+                )
             except Exception as e:
                 messages.warning(request, f'Could not fetch results from Google Books: {str(e)}')
-        
-        if category:
-            books = books.filter(category=category)
+        elif query:  # Only search Google Books if there's a query but no category
+            try:
+                google_books_service = GoogleBooksService()
+                google_books_results = google_books_service.search_books(query=query)
+            except Exception as e:
+                messages.warning(request, f'Could not fetch results from Google Books: {str(e)}')
     
     # Pagination for local books
     paginator = Paginator(books, 12)  # Show 12 books per page
