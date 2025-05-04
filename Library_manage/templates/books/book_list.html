@@ -19,7 +19,48 @@
         </div>
     </div>
 
+    {% if google_books_results %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <h3>Results from Google Books</h3>
+        </div>
+        {% for book in google_books_results %}
+        <div class="col-md-4 mb-4">
+            <div class="card book-card h-100">
+                {% if book.image_url %}
+                <img src="{{ book.image_url }}" class="card-img-top book-cover" alt="{{ book.title }}">
+                {% else %}
+                <div class="card-img-top book-cover bg-light d-flex align-items-center justify-content-center">
+                    <i class="fas fa-book fa-3x text-muted"></i>
+                </div>
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title">{{ book.title }}</h5>
+                    <p class="card-text text-muted">by {{ book.authors|join:", " }}</p>
+                    <p class="card-text">
+                        <small class="text-muted">
+                            Published: {{ book.published_date }}
+                        </small>
+                    </p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="badge bg-info">
+                            Google Books
+                        </span>
+                        <a href="{% url 'books:import_google_book' book.google_books_id %}" class="btn btn-outline-primary btn-sm">
+                            Import to Library
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
     <div class="row">
+        <div class="col-12">
+            <h3>Library Books</h3>
+        </div>
         {% for book in books %}
         <div class="col-md-4 mb-4">
             <div class="card book-card h-100">

@@ -13,27 +13,37 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.views.generic import ListView, CreateView, UpdateView
 from django.urls import reverse_lazy
 from django.db.models import Count
+from .services import GoogleBooksService
 
 def book_list(request):
-    books = Book.objects.all().order_by('title')  # Add ordering by title
+    books = Book.objects.all().order_by('title')
     categories = Category.objects.all()
     search_form = BookSearchForm(request.GET)
+    google_books_results = []
     
     if search_form.is_valid():
         query = search_form.cleaned_data.get('query')
         category = search_form.cleaned_data.get('category')
         
         if query:
+            # Search local database
             books = books.filter(
                 Q(title__icontains=query) |
                 Q(author__icontains=query) |
                 Q(isbn__icontains=query)
             )
+            
+            # Search Google Books API
+            try:
+                google_books_service = GoogleBooksService()
+                google_books_results = google_books_service.search_books(query)
+            except Exception as e:
+                messages.warning(request, f'Could not fetch results from Google Books: {str(e)}')
         
         if category:
             books = books.filter(category=category)
     
-    # Pagination
+    # Pagination for local books
     paginator = Paginator(books, 12)  # Show 12 books per page
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
@@ -42,6 +52,7 @@ def book_list(request):
         'books': page_obj,
         'categories': categories,
         'search_form': search_form,
+        'google_books_results': google_books_results,
     }
     return render(request, 'books/book_list.html', context)
 
@@ -271,3 +282,35 @@ def add_book(request):
         'title': 'Add New Book'
     }
     return render(request, 'books/book_form.html', context)
+
+@login_required
+def import_google_book(request, google_books_id):
+    if not request.user.is_manager:
+        messages.error(request, 'Only managers can import books.')
+        return redirect('books:list')
+    
+    try:
+        google_books_service = GoogleBooksService()
+        book_data = google_books_service.get_book_details(google_books_id)
+        
+        if not book_data:
+            messages.error(request, 'Could not find book details.')
+            return redirect('books:list')
+        
+        # Create a new book in the library
+        book = Book.objects.create(
+            title=book_data['title'],
+            author=', '.join(book_data['authors']),
+            isbn=book_data['isbn'],
+            description=book_data['description'],
+            total_copies=1,
+            available_copies=1,
+            published_date=book_data['published_date']
+        )
+        
+        messages.success(request, f'Successfully imported "{book.title}" into the library.')
+        return redirect('books:detail', pk=book.pk)
+    
+    except Exception as e:
+        messages.error(request, f'Error importing book: {str(e)}')
+        return redirect('books:list')

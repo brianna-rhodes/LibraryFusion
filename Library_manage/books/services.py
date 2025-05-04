@@ -30,7 +30,7 @@ class GoogleBooksService:
             result = self.service.volumes().list(
                 q=query,
                 maxResults=max_results,
-                printType='books'
+                printType='BOOKS'
             ).execute()
             
             books = []
