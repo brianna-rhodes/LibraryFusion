@@ -257,7 +257,7 @@ def add_librarian(request):
         form = LibrarianForm(request.POST)
         if form.is_valid():
             user = form.save(commit=False)
-            user.is_librarian = True
+            user.role = 'LIBRARIAN'
             user.save()
             messages.success(request, 'Librarian added successfully!')
             return redirect('managers:manage_librarians')
