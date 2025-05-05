@@ -16,4 +16,7 @@ urlpatterns = [
     path('orders/<int:pk>/edit/', views.OrderUpdateView.as_view(), name='order_update'),
     path('add/', views.add_book, name='add'),
     path('import-google-book/<str:google_books_id>/', views.import_google_book, name='import_google_book'),
+    path('requests/', views.book_requests_list, name='book_requests_list'),
+    path('requests/<int:request_id>/accept/', views.accept_book_request, name='accept_book_request'),
+    path('requests/<int:request_id>/delete/', views.delete_book_request, name='delete_book_request'),
 ] 

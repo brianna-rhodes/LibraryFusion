@@ -77,3 +77,17 @@ class Order(models.Model):
     
     class Meta:
         ordering = ['-order_date']
+
+class BookRequest(models.Model):
+    STATUS_CHOICES = [
+        ('PENDING', 'Pending'),
+        ('ACCEPTED', 'Accepted'),
+    ]
+    title = models.CharField(max_length=200)
+    author = models.CharField(max_length=200)
+    requester = models.ForeignKey(User, on_delete=models.CASCADE, related_name='book_requests')
+    requested_at = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='PENDING')
+
+    def __str__(self):
+        return f"{self.title} by {self.author} (requested by {self.requester.username})"

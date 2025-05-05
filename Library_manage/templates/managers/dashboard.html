@@ -12,6 +12,8 @@
         </div>
     </div>
 
+    {% include 'shared/google_books_search.html' %}
+
     <!-- Quick Actions -->
     <div class="row mb-4">
         <div class="col">
@@ -30,6 +32,9 @@
                         </a>
                         <a href="{% url 'managers:export_report' 'borrowings' %}" class="btn btn-success">
                             <i class="fas fa-file-export"></i> Export Reports
+                        </a>
+                        <a href="{% url 'books:book_requests_list' %}" class="btn btn-warning">
+                            <i class="fas fa-book"></i> View Book Requests
                         </a>
                     </div>
                 </div>

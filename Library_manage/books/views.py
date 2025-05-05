@@ -1,13 +1,13 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
 from django.db.models import Q, Avg
 from django.core.paginator import Paginator
 from django.utils import timezone
 from datetime import timedelta
-from .models import Book, Category, BorrowingRecord, Order
+from .models import Book, Category, BorrowingRecord, Order, BookRequest
 from reviews.models import Review
-from .forms import BookSearchForm, BorrowBookForm, OrderForm, BookForm
+from .forms import BookSearchForm, BorrowBookForm, OrderForm, BookForm, BookRequestForm
 from reviews.forms import ReviewForm
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.views.generic import ListView, CreateView, UpdateView
@@ -160,8 +160,21 @@ def my_books(request):
         status='BORROWED'
     ).select_related('book')
     
+    # Book request form logic
+    if request.method == 'POST':
+        request_form = BookRequestForm(request.POST)
+        if request_form.is_valid():
+            book_request = request_form.save(commit=False)
+            book_request.requester = request.user
+            book_request.save()
+            messages.success(request, 'Your book request has been submitted!')
+            return redirect('books:my_books')
+    else:
+        request_form = BookRequestForm()
+
     context = {
         'borrowed_books': borrowed_books,
+        'request_form': request_form,
     }
     return render(request, 'books/my_books.html', context)
 
@@ -327,3 +340,29 @@ def import_google_book(request, google_books_id):
     except Exception as e:
         messages.error(request, f'Error importing book: {str(e)}')
         return redirect('books:list')
+
+@login_required
+@user_passes_test(lambda u: u.is_manager or u.is_librarian)
+def book_requests_list(request):
+    requests = BookRequest.objects.select_related('requester').order_by('-requested_at')
+    context = {'book_requests': requests}
+    return render(request, 'books/book_requests_list.html', context)
+@login_required
+@user_passes_test(lambda u: u.is_manager or u.is_librarian)
+def accept_book_request(request, request_id):
+    book_request = get_object_or_404(BookRequest, id=request_id)
+    if request.method == 'POST':
+        book_request.status = 'ACCEPTED'
+        book_request.save()
+        messages.success(request, 'Book request accepted.')
+    return redirect('books:book_requests_list')
+
+@login_required
+@user_passes_test(lambda u: u.is_manager or u.is_librarian)
+def delete_book_request(request, request_id):
+    book_request = get_object_or_404(BookRequest, id=request_id)
+    if request.method == 'POST':
+        book_request.delete()
+        messages.success(request, 'Book request deleted.')
+    return redirect('books:book_requests_list')
+

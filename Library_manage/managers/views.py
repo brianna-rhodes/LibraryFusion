@@ -22,6 +22,7 @@ import pandas as pd
 import json
 from openpyxl import Workbook
 from openpyxl.styles import Font
+from account.forms import UserProfileForm
 
 def is_manager(user):
     """Check if user is a manager"""
@@ -444,6 +445,20 @@ def confirm_suspend(request, pk):
         'action': 'suspend' if user.is_active else 'activate'
     }
     return render(request, 'managers/confirm_suspend.html', context)
+
+@login_required
+@user_passes_test(is_manager)
+def edit_user(request, pk):
+    user = get_object_or_404(User, pk=pk)
+    if request.method == 'POST':
+        form = UserProfileForm(request.POST, request.FILES, instance=user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'User details updated successfully!')
+            return redirect('managers:user_detail', pk=pk)
+    else:
+        form = UserProfileForm(instance=user)
+    return render(request, 'managers/edit_user.html', {'form': form, 'user': user})
 
 class ReportsView(LoginRequiredMixin, UserPassesTestMixin, ListView):
     template_name = 'managers/reports.html'

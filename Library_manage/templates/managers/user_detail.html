@@ -26,6 +26,9 @@
                             <i class="fas {% if user.is_active %}fa-user-slash{% else %}fa-user-check{% endif %}"></i>
                             {% if user.is_active %}Suspend User{% else %}Activate User{% endif %}
                         </a>
+                        <a href="{% url 'managers:edit_user' user.pk %}" class="btn btn-info">
+                            <i class="fas fa-edit"></i> Edit User
+                        </a>
                     </div>
                 </div>
             </div>

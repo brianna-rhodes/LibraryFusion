@@ -1,5 +1,5 @@
 from django import forms
-from .models import Book, Category, BorrowingRecord, Order
+from .models import Book, Category, BorrowingRecord, Order, BookRequest
 
 class BookForm(forms.ModelForm):
     class Meta:
@@ -43,15 +43,7 @@ class OrderForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields['book'].queryset = Book.objects.all().order_by('title') 
 
-class OrderForm(forms.ModelForm):
+class BookRequestForm(forms.ModelForm):
     class Meta:
-        model = Order
-        fields = ['book', 'quantity', 'estimated_delivery', 'notes']
-        widgets = {
-            'estimated_delivery': forms.DateInput(attrs={'type': 'date'}),
-            'notes': forms.Textarea(attrs={'rows': 3}),
-        }
-    
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields['book'].queryset = Book.objects.all().order_by('title') 
+        model = BookRequest
+        fields = ['title', 'author']

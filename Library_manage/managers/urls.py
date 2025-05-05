@@ -31,6 +31,7 @@ urlpatterns = [
     path('users/<int:pk>/', views.user_detail, name='user_detail'),
     path('users/<int:pk>/suspend/', views.suspend_user, name='suspend_user'),
     path('users/<int:pk>/confirm-suspend/', views.confirm_suspend, name='confirm_suspend'),
+    path('users/<int:pk>/edit/', views.edit_user, name='edit_user'),
 
     # Admin Panel
     path('admin-panel/', views.admin_control_panel, name='admin_panel'),

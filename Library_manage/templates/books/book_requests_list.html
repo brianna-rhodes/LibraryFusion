@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% block title %}Book Requests{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <h2>Book Requests</h2>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Author</th>
+                <th>Requested By</th>
+                <th>Date</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for req in book_requests %}
+            <tr>
+                <td>{{ req.title }}</td>
+                <td>{{ req.author }}</td>
+                <td>{{ req.requester.username }}</td>
+                <td>{{ req.requested_at|date:"Y-m-d H:i" }}</td>
+                <td>
+                    {% if req.status == 'ACCEPTED' %}
+                        <span class="badge bg-success">Accepted</span>
+                    {% else %}
+                        <span class="badge bg-secondary">Pending</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if req.status == 'PENDING' %}
+                    <form method="post" action="{% url 'books:accept_book_request' req.id %}" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-success btn-sm">Accept</button>
+                    </form>
+                    {% endif %}
+                    <form method="post" action="{% url 'books:delete_book_request' req.id %}" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5">No requests found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %} 

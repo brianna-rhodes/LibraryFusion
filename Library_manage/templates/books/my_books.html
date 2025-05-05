@@ -62,5 +62,19 @@
         <p class="mb-0">Please visit the library to settle your fines.</p>
     </div>
     {% endif %}
+
+    <!-- Book Request Form -->
+    <div class="card mt-5">
+        <div class="card-header">
+            <h4>Request a Book</h4>
+        </div>
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                {{ request_form.as_p }}
+                <button type="submit" class="btn btn-primary">Submit Request</button>
+            </form>
+        </div>
+    </div>
 </div>
 {% endblock %} 
